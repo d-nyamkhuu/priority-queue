@@ -1,0 +1,16 @@
+# Traffic classes: the EPP turns (objective priority, fairness id) into a flow
+# key, i.e. one queue per tenant inside each priority band. Clients select
+# one by name, so the names are not release-scoped.
+{{- range .Values.inferenceObjectives }}
+---
+apiVersion: llm-d.ai/v1
+kind: InferenceObjective
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "pd-pool.labels" $ | nindent 4 }}
+spec:
+  priority: {{ .priority }}
+  poolRefs:
+    - name: {{ $.Values.router.releaseName }}
+{{- end }}

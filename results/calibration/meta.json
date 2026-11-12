@@ -1,0 +1,191 @@
+{
+  "start": 1794102308.925877,
+  "end": 1794104693.5659819,
+  "model": "Qwen/Qwen3.5-9B",
+  "shapes": {
+    "default": {
+      "prompt_tokens": 512,
+      "output_tokens": 128
+    },
+    "prefill-heavy": {
+      "prompt_tokens": 4096,
+      "output_tokens": 32
+    },
+    "decode-heavy": {
+      "prompt_tokens": 256,
+      "output_tokens": 1024
+    }
+  },
+  "levels": [
+    {
+      "shape": "default",
+      "concurrency": 4,
+      "start": 10.07665355500012,
+      "measure_start": 25.07665355500012,
+      "measure_end": 85.07665355500012
+    },
+    {
+      "shape": "default",
+      "concurrency": 8,
+      "start": 96.74501418100044,
+      "measure_start": 111.74501418100044,
+      "measure_end": 171.74501418100044
+    },
+    {
+      "shape": "default",
+      "concurrency": 16,
+      "start": 183.44206630000008,
+      "measure_start": 198.44206630000008,
+      "measure_end": 258.4420663000001
+    },
+    {
+      "shape": "default",
+      "concurrency": 32,
+      "start": 270.09907224699964,
+      "measure_start": 285.09907224699964,
+      "measure_end": 345.09907224699964
+    },
+    {
+      "shape": "default",
+      "concurrency": 48,
+      "start": 356.81846687300003,
+      "measure_start": 371.81846687300003,
+      "measure_end": 431.81846687300003
+    },
+    {
+      "shape": "default",
+      "concurrency": 64,
+      "start": 443.947845785,
+      "measure_start": 458.947845785,
+      "measure_end": 518.947845785
+    },
+    {
+      "shape": "default",
+      "concurrency": 96,
+      "start": 531.1267767230001,
+      "measure_start": 546.1267767230001,
+      "measure_end": 606.1267767230001
+    },
+    {
+      "shape": "default",
+      "concurrency": 128,
+      "start": 619.4332182999997,
+      "measure_start": 634.4332182999997,
+      "measure_end": 694.4332182999997
+    },
+    {
+      "shape": "default",
+      "concurrency": 160,
+      "start": 709.0928911239998,
+      "measure_start": 724.0928911239998,
+      "measure_end": 784.0928911239998
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 2,
+      "start": 799.807021263,
+      "measure_start": 814.807021263,
+      "measure_end": 874.807021263
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 4,
+      "start": 885.3971976889998,
+      "measure_start": 900.3971976889998,
+      "measure_end": 960.3971976889998
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 8,
+      "start": 971.0966356729996,
+      "measure_start": 986.0966356729996,
+      "measure_end": 1046.0966356729996
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 16,
+      "start": 1057.3502156759996,
+      "measure_start": 1072.3502156759996,
+      "measure_end": 1132.3502156759996
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 24,
+      "start": 1144.2197646860004,
+      "measure_start": 1159.2197646860004,
+      "measure_end": 1219.2197646860004
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 32,
+      "start": 1231.8574458559997,
+      "measure_start": 1246.8574458559997,
+      "measure_end": 1306.8574458559997
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 48,
+      "start": 1320.415617363,
+      "measure_start": 1335.415617363,
+      "measure_end": 1395.415617363
+    },
+    {
+      "shape": "prefill-heavy",
+      "concurrency": 64,
+      "start": 1410.5762325240003,
+      "measure_start": 1425.5762325240003,
+      "measure_end": 1485.5762325240003
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 8,
+      "start": 1502.5276225360003,
+      "measure_start": 1517.5276225360003,
+      "measure_end": 1607.5276225360003
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 16,
+      "start": 1619.0037748269997,
+      "measure_start": 1634.0037748269997,
+      "measure_end": 1724.0037748269997
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 32,
+      "start": 1743.0835532629999,
+      "measure_start": 1758.0835532629999,
+      "measure_end": 1848.0835532629999
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 64,
+      "start": 1867.6090362389996,
+      "measure_start": 1882.6090362389996,
+      "measure_end": 1972.6090362389996
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 96,
+      "start": 1997.6415956330002,
+      "measure_start": 2012.6415956330002,
+      "measure_end": 2102.641595633
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 128,
+      "start": 2125.316997958,
+      "measure_start": 2140.316997958,
+      "measure_end": 2230.316997958
+    },
+    {
+      "shape": "decode-heavy",
+      "concurrency": 160,
+      "start": 2257.7463946870002,
+      "measure_start": 2272.7463946870002,
+      "measure_end": 2362.7463946870002
+    }
+  ],
+  "hold_s": 60,
+  "warmup_s": 15
+}

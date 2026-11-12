@@ -1,0 +1,22 @@
+# Does stage-aware admission protect P/D serving?
+# Two surges stress different P/D stages:
+#   prefill-surge  large prompts, short outputs   -> prompt-token pressure
+#   decode-surge   short prompts, long outputs    -> in-flight request pressure
+# Compared detectors: request count only, token count only, hybrid.
+# Expected: requests sees only decode pressure,
+# tokens only prefill pressure, hybrid both. A small realtime probe shows
+# whether priority traffic stays protected in each case.
+name: pd-shapes
+variants: [requests, tokens, hybrid]
+phases:
+  - {name: warmup, duration_s: 30}
+  - {name: prefill-surge, duration_s: 120}
+  - {name: gap, duration_s: 30}
+  - {name: decode-surge, duration_s: 120}
+  - {name: cooldown, duration_s: 45}
+measure_phases: [prefill-surge, decode-surge]
+request_timeout_s: 900
+tenants:
+  - {name: prefill-heavy, objective: standard, shape: prefill-heavy, rate: {warmup: 0.1, prefill-surge: 1.6}}
+  - {name: decode-heavy, objective: standard, shape: decode-heavy, rate: {warmup: 0.1, decode-surge: 1.6}}
+  - {name: realtime-probe, objective: realtime, fairness_id: probe, rate: 0.1}

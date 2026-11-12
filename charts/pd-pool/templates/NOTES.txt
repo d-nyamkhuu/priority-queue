@@ -1,0 +1,9 @@
+Model servers are starting. The first start downloads {{ .Values.model.name }}
+{{- if .Values.persistence.enabled }} into the shared
+weight cache (Job {{ include "pd-pool.fullname" . }}-download-*){{ end }} and compiles, so expect several minutes:
+
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }} -w
+
+If the router isn't installed yet, install it next as release
+{{ .Values.router.releaseName }} (README, "Deploy the model servers and the router").
+Then run the benchmark with pqbench (README, "Run a scenario").

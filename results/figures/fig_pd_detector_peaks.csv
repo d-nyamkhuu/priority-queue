@@ -1,0 +1,7 @@
+variant,phase,peak,probe_p95
+hybrid,decode-surge,1.0208,700.8644533998449
+hybrid,prefill-surge,1.056,1089.554872249664
+requests,decode-surge,0.875,2282.4257030002645
+requests,prefill-surge,0.8125,6652.070291000565
+tokens,decode-surge,0.9328,8701.889219150964
+tokens,prefill-surge,1.0736,1058.0408009500381

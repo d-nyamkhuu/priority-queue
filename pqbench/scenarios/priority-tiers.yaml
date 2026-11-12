@@ -1,0 +1,24 @@
+# Does flow control protect priority traffic under saturation?
+# Four tiers (Platinum, Gold, Silver, Bronze Batch), mapped
+# onto the three InferenceObjectives: Platinum and Gold are realtime (separate
+# tenant queues), Silver is standard, Bronze is batch. A Bronze surge pushes
+# total demand to ~1.8x capacity. Expected with flow control: Platinum, Gold
+# and Silver stay close to their unsaturated TTFT while Bronze absorbs the wait.
+# Without flow control, the EPP still drops sheddable (negative-priority)
+# Bronze requests with 429 once the pool is saturated; everyone else queues
+# inside vLLM together.
+name: priority-tiers
+variants: [hybrid, no-flow-control]
+phases:
+  - {name: warmup, duration_s: 30}
+  - {name: surge, duration_s: 120}
+  - {name: cooldown, duration_s: 60}
+measure_phases: [surge]
+# Rates are fractions of the calibrated capacity (req/s) of the tenant's shape:
+# one number for every phase, or per phase (a phase left out is 0).
+# fairness_id (the tenant queue) defaults to the name.
+tenants:
+  - {name: platinum, objective: realtime, rate: 0.15}
+  - {name: gold,     objective: realtime, rate: 0.15}
+  - {name: silver,   objective: standard, rate: 0.3}
+  - {name: bronze,   objective: batch,    rate: {warmup: 0.1, surge: 1.2, cooldown: 0.1}}

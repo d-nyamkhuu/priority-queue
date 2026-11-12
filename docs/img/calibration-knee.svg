@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" width="1000" height="330" role="img" aria-label="Calibration, default shape: completed requests per second stop growing at about 64 concurrent requests, while p95 TTFT keeps rising; 64 became maxConcurrency">
+<title>Calibration, default shape: completed requests per second stop growing at about 64 concurrent requests, while p95 TTFT keeps rising; 64 became maxConcurrency</title>
+<defs></defs>
+<rect x="0.5" y="0.5" width="999" height="329" rx="0" fill="#ffffff" stroke="none"/>
+<text x="40" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">Throughput flattens…</text>
+<line x1="80" y1="280.0" x2="440" y2="280.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="74" y="284.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">0</text>
+<line x1="80" y1="225.0" x2="440" y2="225.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="74" y="229.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">8</text>
+<line x1="80" y1="170.0" x2="440" y2="170.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="74" y="174.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">16</text>
+<line x1="80" y1="115.0" x2="440" y2="115.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="74" y="119.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">24</text>
+<line x1="80" y1="60.0" x2="440" y2="60.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="74" y="64.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">32</text>
+<text x="80.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">0</text>
+<text x="152.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">32</text>
+<text x="224.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">64</text>
+<text x="296.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">96</text>
+<text x="368.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">128</text>
+<text x="440.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">160</text>
+<text x="260.0" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">concurrent clients</text>
+<line x1="224.0" y1="60" x2="224.0" y2="280" stroke="#18283f" stroke-width="1.5" stroke-dasharray="5 4"/>
+<polyline points="89.0,265.7 98.0,249.8 116.0,223.2 152.0,180.9 188.0,141.0 224.0,115.3 296.0,102.1 368.0,102.3 440.0,98.4" fill="none" stroke="#2b4c7e" stroke-width="2.5"/>
+<circle cx="89.0" cy="265.7" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="98.0" cy="249.8" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="116.0" cy="223.2" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="152.0" cy="180.9" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="188.0" cy="141.0" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="224.0" cy="115.3" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="296.0" cy="102.1" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="368.0" cy="102.3" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<circle cx="440.0" cy="98.4" r="4" fill="#ffffff" stroke="#2b4c7e" stroke-width="2"/>
+<text x="80" y="52" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">completed req/s</text>
+<text x="216.0" y="103.34375" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="end" font-weight="bold">knee: 64 → 24 req/s</text>
+<text x="368.0" y="128.28125" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">2.5× the clients past the knee,</text>
+<text x="368.0" y="142.28125" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">only +10% req/s</text>
+<text x="540" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">…while waiting keeps growing</text>
+<line x1="580" y1="280.0" x2="940" y2="280.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="574" y="284.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">0</text>
+<line x1="580" y1="225.0" x2="940" y2="225.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="574" y="229.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">1 s</text>
+<line x1="580" y1="170.0" x2="940" y2="170.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="574" y="174.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">2 s</text>
+<line x1="580" y1="115.0" x2="940" y2="115.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="574" y="119.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">3 s</text>
+<line x1="580" y1="60.0" x2="940" y2="60.0" stroke="#e6eaef" stroke-width="1"/>
+<text x="574" y="64.0" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="end" font-weight="normal">4 s</text>
+<text x="580.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">0</text>
+<text x="652.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">32</text>
+<text x="724.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">64</text>
+<text x="796.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">96</text>
+<text x="868.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">128</text>
+<text x="940.0" y="296" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#526173" text-anchor="middle" font-weight="normal">160</text>
+<text x="760.0" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">concurrent clients</text>
+<line x1="724.0" y1="60" x2="724.0" y2="280" stroke="#18283f" stroke-width="1.5" stroke-dasharray="5 4"/>
+<polyline points="589.0,263.5 598.0,264.9 616.0,264.0 652.0,263.0 688.0,259.9 724.0,253.6 796.0,198.5 868.0,126.8 940.0,52.5" fill="none" stroke="#a8352b" stroke-width="2.5"/>
+<circle cx="589.0" cy="263.5" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="598.0" cy="264.9" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="616.0" cy="264.0" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="652.0" cy="263.0" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="688.0" cy="259.9" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="724.0" cy="253.6" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="796.0" cy="198.5" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="868.0" cy="126.8" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<circle cx="940.0" cy="52.5" r="4" fill="#ffffff" stroke="#a8352b" stroke-width="2"/>
+<text x="580" y="52" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">p95 TTFT</text>
+<text x="716.0" y="239.56321430600474" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="end" font-weight="bold">481 ms at the knee</text>
+<text x="932.0" y="56.494005262009495" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="end" font-weight="bold">4.1 s</text>
+</svg>

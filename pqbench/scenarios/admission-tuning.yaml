@@ -1,0 +1,17 @@
+# How admission settings trade realtime latency against standard throughput,
+# and whether reserved capacity (holdback) protects realtime.
+# The consolidation traffic again, under three admission settings:
+#   hybrid       calibrated caps + priority holdback (1.0 / 0.75 / 0.5)
+#   no-holdback  same caps, one shared ceiling for every band
+#   cap-tight    0.5x request cap: more queueing in the EPP, less inside vLLM
+name: admission-tuning
+variants: [hybrid, no-holdback, cap-tight]
+phases:
+  - {name: warmup, duration_s: 30}
+  - {name: surge, duration_s: 120}
+  - {name: cooldown, duration_s: 60}
+measure_phases: [surge]
+tenants:
+  - {name: realtime-a, objective: realtime, fairness_id: tenant-a, rate: 0.25}
+  - {name: realtime-b, objective: realtime, fairness_id: tenant-b, rate: 0.25}
+  - {name: standard-c, objective: standard, fairness_id: tenant-c, rate: {warmup: 0.1, surge: 1.3, cooldown: 0.1}}

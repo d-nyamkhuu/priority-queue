@@ -1,0 +1,200 @@
+{{- /*
+Prefill/decode model servers as one DisaggregatedSet (LeaderWorkerSet API).
+
+Derived from upstream llm-d v1.0.0
+guides/pd-disaggregation/modelserver/gpu/vllm/base (and the gpu-vllm/release
+image and monitoring-pd components), rendered and turned into a template so
+model, flags and placement are values. Changes from upstream: Qwen3.5-9B at
+TP1 on both roles by default (upstream: gpt-oss-120b, decode TP4), KV over UCX
+TCP, a shared weight cache (llm-d's model-cache component), and the sidecar
+pinned to its v1.0.0 release instead of the nightly tag.
+*/ -}}
+{{- $root := . }}
+{{- if lt (int .Values.decode.tensorParallelSize) (int .Values.prefill.tensorParallelSize) }}
+{{- fail "decode.tensorParallelSize must be >= prefill.tensorParallelSize (vLLM's NIXL connector only supports decode TP >= prefill TP)" }}
+{{- end }}
+{{- $marker := printf "/hf-cache/%s" (include "pd-pool.weightsMarker" .) }}
+apiVersion: disaggregatedset.x-k8s.io/v1
+kind: DisaggregatedSet
+metadata:
+  name: {{ include "pd-pool.fullname" . }}
+  labels:
+    {{- include "pd-pool.labels" . | nindent 4 }}
+    {{- include "pd-pool.modelServerLabels" . | nindent 4 }}
+spec:
+  slices: 1
+  roles:
+  {{- range $role := list "prefill" "decode" }}
+  {{- $cfg := index $root.Values $role }}
+  {{- $port := include "pd-pool.modelServerPort" $role }}
+  {{- $kv := merge (dict "kv_role" (ternary "kv_consumer" "kv_producer" (eq $role "decode"))) $root.Values.modelServers.kvTransfer }}
+  {{- $resources := mergeOverwrite (deepCopy $root.Values.modelServers.resources) $cfg.resources }}
+  {{- $gpus := toString $cfg.tensorParallelSize }}
+  {{- $_ := set $resources.requests "nvidia.com/gpu" $gpus }}
+  {{- $_ := set $resources.limits "nvidia.com/gpu" $gpus }}
+    - name: {{ $role }}
+      spec:
+        replicas: {{ $cfg.replicas }}
+        # Take an old pod down before starting its replacement: a two-GPU pool
+        # has no spare GPU to surge into. A changed template still rolls out
+        # as a new revision (new LeaderWorkerSets), not in place.
+        rolloutStrategy:
+          type: RollingUpdate
+          rollingUpdateConfiguration:
+            maxSurge: 0
+            maxUnavailable: 1
+        # As upstream: interchangeable groups, so scale-down removes unhealthy
+        # ones first.
+        groupIdentity: Hash
+        leaderWorkerTemplate:
+          # One pod per engine; TP stays within a node.
+          size: 1
+          workerTemplate:
+            metadata:
+              labels:
+                {{- include "pd-pool.modelServerLabels" $root | nindent 16 }}
+                {{- include "pd-pool.selectorLabels" $root | nindent 16 }}
+                app.kubernetes.io/component: {{ $role }}
+                llm-d.ai/role: {{ $role }}
+            spec:
+              automountServiceAccountToken: false
+              terminationGracePeriodSeconds: 75
+              {{- with $cfg.nodeSelector }}
+              nodeSelector:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with $cfg.tolerations }}
+              tolerations:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with $cfg.affinity }}
+              affinity:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              initContainers:
+                {{- if $root.Values.persistence.enabled }}
+                # The download Job fills the shared cache; vLLM then runs offline.
+                - name: wait-for-weights
+                  image: {{ include "pd-pool.image" $root.Values.modelServers.image }}
+                  imagePullPolicy: {{ $root.Values.modelServers.image.pullPolicy }}
+                  command: [sh, -c, 'until [ -f {{ $marker }} ]; do echo "waiting for the download Job"; sleep 10; done']
+                  resources:
+                    requests: {cpu: 10m, memory: 16Mi}
+                {{- else }}
+                - name: download-weights
+                  image: {{ include "pd-pool.image" $root.Values.modelServers.image }}
+                  imagePullPolicy: {{ $root.Values.modelServers.image.pullPolicy }}
+                  command: [sh, -c, {{ include "pd-pool.downloadCommand" $root | quote }}]
+                  env:
+                    {{- include "pd-pool.hfEnv" $root | nindent 20 }}
+                  resources:
+                    requests: {cpu: "1", memory: 2Gi}
+                {{- end }}
+                  volumeMounts:
+                    - name: hf-cache
+                      mountPath: /hf-cache
+                {{- if eq $role "decode" }}
+                - name: routing-proxy
+                  image: {{ include "pd-pool.image" $root.Values.routingSidecar.image }}
+                  imagePullPolicy: {{ $root.Values.routingSidecar.image.pullPolicy }}
+                  restartPolicy: Always
+                  args:
+                    - --port=8000
+                    - --kv-connector=nixlv2
+                    - --zap-log-level=1
+                    - --secure-serving=false
+                  ports:
+                    - name: sidecar
+                      containerPort: 8000
+                      protocol: TCP
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    runAsNonRoot: true
+                {{- end }}
+              containers:
+                - name: modelserver
+                  image: {{ include "pd-pool.image" $root.Values.modelServers.image }}
+                  imagePullPolicy: {{ $root.Values.modelServers.image.pullPolicy }}
+                  command: ["vllm", "serve"]
+                  args:
+                    - {{ $root.Values.model.name | quote }}
+                    {{- with $root.Values.model.revision }}
+                    - "--revision={{ . }}"
+                    {{- end }}
+                    - "--tensor-parallel-size={{ $cfg.tensorParallelSize }}"
+                    {{- range $root.Values.modelServers.args }}
+                    - {{ . | quote }}
+                    {{- end }}
+                    - "--kv-transfer-config"
+                    - {{ $kv | toJson | squote }}
+                    - "--port={{ $port }}"
+                    {{- range $cfg.extraArgs }}
+                    - {{ . | quote }}
+                    {{- end }}
+                  env:
+                    - name: HF_HOME
+                      value: /hf-cache
+                    - name: HF_HUB_OFFLINE
+                      value: "1"
+                    {{- with $root.Values.modelServers.env }}
+                    {{- toYaml . | nindent 20 }}
+                    {{- end }}
+                    - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: status.podIP
+                    {{- if eq $role "prefill" }}
+                    - name: VLLM_HTTP_TIMEOUT_KEEP_ALIVE
+                      value: "120"
+                    {{- end }}
+                  ports:
+                    - name: modelserver
+                      containerPort: {{ $port }}
+                      protocol: TCP
+                    - name: nixl
+                      containerPort: 5600
+                      protocol: TCP
+                  lifecycle:
+                    preStop:
+                      exec:
+                        command: ["/bin/sleep", "15"]
+                  startupProbe:
+                    httpGet: {path: /v1/models, port: modelserver}
+                    initialDelaySeconds: 15
+                    periodSeconds: 30
+                    timeoutSeconds: 5
+                    failureThreshold: 120
+                  readinessProbe:
+                    httpGet: {path: /v1/models, port: modelserver}
+                    periodSeconds: 5
+                    timeoutSeconds: 2
+                    failureThreshold: 3
+                  livenessProbe:
+                    httpGet: {path: /health, port: modelserver}
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                    failureThreshold: 3
+                  resources:
+                    {{- toYaml $resources | nindent 20 }}
+                  volumeMounts:
+                    - {name: hf-cache, mountPath: /hf-cache}
+                    - {name: shm, mountPath: /dev/shm}
+                    - {name: torch-compile-cache, mountPath: /.cache}
+                    - {name: vllm-config, mountPath: /.config}
+                    - {name: triton-cache, mountPath: /.triton}
+              volumes:
+                {{- if $root.Values.persistence.enabled }}
+                - name: hf-cache
+                  persistentVolumeClaim:
+                    claimName: {{ include "pd-pool.fullname" $root }}-model-cache
+                {{- else }}
+                - {name: hf-cache, emptyDir: {}}
+                {{- end }}
+                - name: shm
+                  emptyDir:
+                    medium: Memory
+                    sizeLimit: {{ $root.Values.modelServers.shmSize }}
+                - {name: torch-compile-cache, emptyDir: {}}
+                - {name: vllm-config, emptyDir: {}}
+                - {name: triton-cache, emptyDir: {}}
+  {{- end }}

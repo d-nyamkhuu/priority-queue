@@ -1,0 +1,167 @@
+{
+  "scenario": "admission-tuning",
+  "variant": "no-holdback",
+  "rep": 1,
+  "model": "Qwen/Qwen3.5-9B",
+  "start": 1794106583.184162,
+  "end": 1794106795.003152,
+  "phases": [
+    {
+      "name": "warmup",
+      "duration_s": 30
+    },
+    {
+      "name": "surge",
+      "duration_s": 120
+    },
+    {
+      "name": "cooldown",
+      "duration_s": 60
+    }
+  ],
+  "measure_phases": [
+    "surge"
+  ],
+  "tenants": [
+    {
+      "name": "realtime-a",
+      "objective": "realtime",
+      "fairness_id": "tenant-a",
+      "prompt_tokens": 512,
+      "output_tokens": 128,
+      "rates_rps": {
+        "warmup": 5.9875,
+        "surge": 5.9875,
+        "cooldown": 5.9875
+      },
+      "client_dropped": 0
+    },
+    {
+      "name": "realtime-b",
+      "objective": "realtime",
+      "fairness_id": "tenant-b",
+      "prompt_tokens": 512,
+      "output_tokens": 128,
+      "rates_rps": {
+        "warmup": 5.9875,
+        "surge": 5.9875,
+        "cooldown": 5.9875
+      },
+      "client_dropped": 0
+    },
+    {
+      "name": "standard-c",
+      "objective": "standard",
+      "fairness_id": "tenant-c",
+      "prompt_tokens": 512,
+      "output_tokens": 128,
+      "rates_rps": {
+        "warmup": 2.395,
+        "surge": 31.135,
+        "cooldown": 2.395
+      },
+      "client_dropped": 0
+    }
+  ],
+  "calibration": {
+    "max_concurrency": 64,
+    "max_token_concurrency": 30000,
+    "shapes": {
+      "decode-heavy": {
+        "prompt_tokens": 256,
+        "output_tokens": 1024,
+        "knee_concurrency": 96,
+        "capacity_rps": 4.267,
+        "peak_rps": 4.678,
+        "peak_total_tps": 6017.2,
+        "peak_output_tps": 4790.0,
+        "prompt_tokens_mean": 262.3,
+        "at_knee": {
+          "input_tps": 1119.122,
+          "output_tps": 4369.067,
+          "total_tps": 5488.189,
+          "ttft_p50_ms": 358.272,
+          "ttft_p95_ms": 758.475,
+          "ttft_p99_ms": 926.909,
+          "tpot_p50_ms": 21.928,
+          "tpot_p95_ms": 22.101,
+          "tpot_p99_ms": 22.117,
+          "decode_tps_p50": 45.604,
+          "decode_tps_p5": 45.246,
+          "e2e_p50_s": 22.805,
+          "e2e_p95_s": 23.257,
+          "e2e_p99_s": 23.342,
+          "tok_per_chunk_mean": 1.0
+        }
+      },
+      "default": {
+        "prompt_tokens": 512,
+        "output_tokens": 128,
+        "knee_concurrency": 64,
+        "capacity_rps": 23.95,
+        "peak_rps": 26.417,
+        "peak_total_tps": 16462.3,
+        "peak_output_tps": 3381.3,
+        "prompt_tokens_mean": 495.2,
+        "at_knee": {
+          "input_tps": 11859.15,
+          "output_tps": 3065.6,
+          "total_tps": 14924.75,
+          "ttft_p50_ms": 296.95,
+          "ttft_p95_ms": 480.669,
+          "ttft_p99_ms": 580.929,
+          "tpot_p50_ms": 18.098,
+          "tpot_p95_ms": 21.056,
+          "tpot_p99_ms": 21.665,
+          "decode_tps_p50": 55.254,
+          "decode_tps_p5": 47.493,
+          "e2e_p50_s": 2.636,
+          "e2e_p95_s": 2.992,
+          "e2e_p99_s": 3.085,
+          "tok_per_chunk_mean": 1.0
+        }
+      },
+      "prefill-heavy": {
+        "prompt_tokens": 4096,
+        "output_tokens": 32,
+        "knee_concurrency": 8,
+        "capacity_rps": 6.117,
+        "peak_rps": 6.217,
+        "peak_total_tps": 23531.7,
+        "peak_output_tps": 198.9,
+        "prompt_tokens_mean": 3753.1,
+        "at_knee": {
+          "input_tps": 22956.267,
+          "output_tps": 195.733,
+          "total_tps": 23152.0,
+          "ttft_p50_ms": 902.195,
+          "ttft_p95_ms": 1149.861,
+          "ttft_p99_ms": 1277.311,
+          "tpot_p50_ms": 13.093,
+          "tpot_p95_ms": 14.35,
+          "tpot_p99_ms": 15.37,
+          "decode_tps_p50": 76.379,
+          "decode_tps_p5": 69.685,
+          "e2e_p50_s": 1.306,
+          "e2e_p95_s": 1.566,
+          "e2e_p99_s": 1.711,
+          "tok_per_chunk_mean": 1.0
+        }
+      }
+    },
+    "method": "knee = smallest concurrency reaching 90% of peak req/s in a closed-loop sweep"
+  },
+  "requests": 6460,
+  "max_metrics_gap_s": {
+    "epp": 0.0,
+    "prefill": 0.0,
+    "decode": 0.0
+  },
+  "valid": true,
+  "invalid_reason": null,
+  "epp_outcomes_delta": {
+    "Dispatched|p0": 2040.0,
+    "Dispatched|p100": 2577.0,
+    "RejectedCapacity|p0": 1843.0
+  }
+}

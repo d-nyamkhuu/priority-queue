@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 350" width="1000" height="350" role="img" aria-label="Simplified illustration: on one GPU, a long prompt&#x27;s prefill shares steps with decoding and slows everyone&#x27;s tokens; with P/D, prefill runs on GPU A and decode on GPU B sees much less interference, at the cost of moving the KV cache">
+<title>Simplified illustration: on one GPU, a long prompt&#x27;s prefill shares steps with decoding and slows everyone&#x27;s tokens; with P/D, prefill runs on GPU A and decode on GPU B sees much less interference, at the cost of moving the KV cache</title>
+<defs><marker id="arr-526173" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#526173"/></marker><marker id="arr-2b4c7e" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b4c7e"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="349" rx="0" fill="#ffffff" stroke="none"/>
+<text x="20" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">One GPU does both (aggregated)</text>
+<text x="980" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#8c98a5" text-anchor="end" font-weight="normal">simplified illustration, not to scale</text>
+<text x="190" y="85" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="end" font-weight="bold">GPU</text>
+<rect x="210" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="226" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="242" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="258" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="274" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="290" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="306" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="322" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="338" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="354" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="370" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="386" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="402" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="418" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="434" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="450" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="476" y="64" width="14" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="492" y="64" width="35" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<rect x="531" y="64" width="14" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="547" y="64" width="35" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<rect x="586" y="64" width="14" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="602" y="64" width="35" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<rect x="641" y="64" width="14" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="657" y="64" width="35" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<text x="586" y="56" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#2b4c7e" text-anchor="middle" font-weight="bold">4,096-token prompt, prefilled in chunks</text>
+<rect x="704" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="720" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="736" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="752" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="768" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="784" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="800" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="816" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="832" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="848" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="864" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="880" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="896" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="912" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="928" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="944" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="960" y="64" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<line x1="476" y1="104" x2="696" y2="104" stroke="#a8352b" stroke-width="1.5"/>
+<line x1="476" y1="99" x2="476" y2="109" stroke="#a8352b" stroke-width="1.5"/>
+<line x1="696" y1="99" x2="696" y2="109" stroke="#a8352b" stroke-width="1.5"/>
+<text x="586" y="124" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="middle" font-weight="normal">steps carry prefill chunks,</text>
+<text x="586" y="139" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="middle" font-weight="normal">so tokens come slower</text>
+<text x="210" y="124" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#d16e61" text-anchor="start" font-weight="normal">decode steps (one token per running request)</text>
+<line x1="20" y1="150" x2="980" y2="150" stroke="#e6eaef" stroke-width="1"/>
+<text x="20" y="180" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">Disaggregated (P/D): one GPU per phase</text>
+<text x="190" y="215" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="end" font-weight="bold">GPU A · prefill</text>
+<rect x="300" y="194" width="70" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<text x="335" y="214" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#2b4c7e" text-anchor="middle" font-weight="normal">short</text>
+<rect x="476" y="194" width="220" height="30" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<text x="586" y="214" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="middle" font-weight="bold">prefill: 4,096-token prompt</text>
+<line x1="210" y1="224" x2="970" y2="224" stroke="#e6eaef" stroke-width="1"/>
+<text x="190" y="290" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="end" font-weight="bold">GPU B · decode</text>
+<rect x="210" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="226" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="242" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="258" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="274" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="290" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="306" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="322" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="338" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="354" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="370" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="386" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="402" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="418" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="434" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="450" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="466" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="482" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="498" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="514" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="530" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="546" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="562" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="578" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="594" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="610" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="626" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="642" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="658" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="674" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="690" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="706" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="722" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="738" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="754" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="770" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="786" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="802" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="818" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="834" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="850" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="866" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="882" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="898" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="914" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="930" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<rect x="946" y="270" width="10" height="30" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1"/>
+<path d="M370,226 L392,266" fill="none" stroke="#2b4c7e" stroke-width="2" marker-end="url(#arr-2b4c7e)" stroke-linejoin="round"/>
+<path d="M696,226 L718,266" fill="none" stroke="#2b4c7e" stroke-width="2" marker-end="url(#arr-2b4c7e)" stroke-linejoin="round"/>
+<text x="726" y="252" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="normal">KV cache moves over the network (NIXL)</text>
+<text x="210" y="330" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#d16e61" text-anchor="start" font-weight="normal">decode sees much less prefill interference; each request pays one KV transfer</text>
+<path d="M870,330 L965,330" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<text x="860" y="334" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="end" font-weight="normal">time</text>
+</svg>

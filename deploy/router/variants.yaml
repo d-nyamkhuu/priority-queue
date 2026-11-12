@@ -1,0 +1,36 @@
+# Router variants used by the benchmark scenarios.
+# Each value is a yq (mikefarah v4) expression applied to epp.yaml.
+# render-variants.sh builds variants/<key>.yaml from these; the results are
+# committed, and CI checks they are up to date (README, "Router variants").
+
+# The default configuration: hybrid detector + priority holdback.
+hybrid: "."
+
+# Detector comparisons (pd-shapes scenario).
+requests: >-
+  (.plugins[] | select(.name == "concurrency-detector") | .parameters.concurrencyMode) = "requests"
+tokens: >-
+  (.plugins[] | select(.name == "concurrency-detector") | .parameters.concurrencyMode) = "tokens"
+
+# Admission tuning: one shared ceiling for every band (no reserve for realtime).
+no-holdback: >-
+  del(.flowControl.usageLimitPolicyPluginRef) |
+  del(.plugins[] | select(.name == "priority-holdback"))
+
+# Admission tuning: a request cap at half the calibrated 64 (update it with
+# maxConcurrency in epp.yaml).
+cap-tight: >-
+  (.plugins[] | select(.name == "concurrency-detector") | .parameters.maxConcurrency) = 32
+
+# Baseline: flow control off. Requests go straight to the scheduler and queue
+# inside vLLM instead.
+no-flow-control: >-
+  del(.featureGates) | del(.flowControl) |
+  del(.plugins[] | select(.name == "priority-holdback" or .name == "concurrency-detector" or
+      .name == "round-robin-fairness-policy" or .name == "fcfs-ordering-policy"))
+
+# Calibration: limits so high that the gate never closes, so the sweep
+# measures the raw P/D pool.
+calibrate: >-
+  (.plugins[] | select(.name == "concurrency-detector") | .parameters) |=
+  (.maxConcurrency = 100000 | .maxTokenConcurrency = 1000000000)

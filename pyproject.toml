@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pqbench"
+version = "0.1.0"
+description = "Benchmark llm-d flow control (priority queuing) on a prefill/decode-disaggregated vLLM pool"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+# Only what load generation needs: the container image installs just these.
+dependencies = [
+  "httpx>=0.28,<1",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+analysis = [
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "matplotlib>=3.9",
+  "tabulate>=0.9",
+]
+dev = [
+  "pqbench[analysis]",
+  "pytest>=8",
+  "ruff>=0.8",
+]
+
+[project.scripts]
+pqbench = "pqbench.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pqbench"]
+
+[tool.hatch.build.targets.sdist]
+include = ["pqbench", "tests", "README.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = ["E501", "SIM108", "SIM905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

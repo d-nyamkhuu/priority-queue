@@ -1,0 +1,132 @@
+# EndpointPickerConfig for llm-d-router v1.0.0: P/D disaggregation + flow control.
+#
+# Upstream ships these as two separate guides (guides/pd-disaggregation and
+# guides/flow-control). This file combines them, starting from the P/D
+# flow-control recipe in github.com/alexagriffith/flow-control-benchmarks.
+#
+# Every plugin used here is Beta or Stable in v1.0.0, so the EPP does not need
+# --allow-experimental-plugins.
+#
+# This is the `hybrid` variant. The others are yq expressions in variants.yaml,
+# rendered into variants/<name>.yaml (README, "Router variants"). Install one
+# with --set-file. After a calibration, update the two limits on
+# concurrency-detector and rerun render-variants.sh.
+apiVersion: llm-d.ai/v1
+kind: EndpointPickerConfig
+
+featureGates:
+  - flowControl
+
+plugins:
+  # Reads the OpenAI request body: token counts for the hybrid detector and
+  # the flow key (objective -> priority, fairness id -> tenant queue).
+  - type: openai-parser
+
+  # Candidate selection: one profile for prefill pods, one for decode pods.
+  - type: prefill-filter
+  - type: decode-filter
+  - type: queue-scorer
+  - type: max-score-picker
+
+  # Split every request: prefill pod builds the KV cache, decode pod pulls it
+  # over NIXL and streams the response.
+  - type: always-disagg-pd-decider
+  - type: disagg-profile-handler
+    parameters:
+      deciders:
+        prefill: always-disagg-pd-decider
+
+  # In-flight accounting consumed by the hybrid detector. Count only tokens
+  # already in the request; max_tokens is an upper bound, not a prediction.
+  - name: inflight-load
+    type: inflight-load-producer
+    parameters:
+      addEstimatedOutputTokens: false
+
+  # Saturation signal. hybrid = per-endpoint max(request ratio, token ratio),
+  # averaged across endpoints, so prefill-heavy (prompt tokens) and
+  # decode-heavy (long generations) pressure are both visible.
+  # Calibrated for Qwen3.5-9B on 2 x RTX PRO 6000 (results/calibration/):
+  # maxConcurrency = default-shape knee, maxTokenConcurrency = prefill-heavy
+  # knee x mean prompt. Recalibrate on other hardware.
+  - name: concurrency-detector
+    type: concurrency-detector
+    parameters:
+      concurrencyMode: hybrid
+      inFlightLoadProducerName: inflight-load
+      maxConcurrency: 64
+      maxTokenConcurrency: 30000
+      headroom: 0.1
+
+  # Within a band: tenants take turns (round robin), and each tenant queue is FCFS.
+  - name: round-robin-fairness-policy
+    type: round-robin-fairness-policy
+  - name: fcfs-ordering-policy
+    type: fcfs-ordering-policy
+
+  # Priority holdback: each band stops dispatching at its own fraction of the
+  # measured capacity, which keeps headroom free for higher priorities.
+  # `explicit` pins the ceilings per priority. `rank` would re-space them
+  # across whichever priorities are active, so a two-class run would silently
+  # get 1.0/0.5 instead of 1.0/0.75.
+  - name: priority-holdback
+    type: priority-holdback-policy
+    parameters:
+      domain: explicit
+      ceilings:
+        100: 1.0
+        0: 0.75
+        -10: 0.5
+
+requestHandler:
+  parsers:
+    - pluginRef: openai-parser
+
+schedulingProfiles:
+  # Prefill: the pod that reads the prompt and produces KV blocks.
+  - name: prefill
+    plugins:
+      - pluginRef: prefill-filter
+      - pluginRef: queue-scorer
+      - pluginRef: max-score-picker
+  # Decode: the pod that owns the response (its routing sidecar calls prefill first).
+  - name: decode
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: queue-scorer
+      - pluginRef: max-score-picker
+
+flowControl:
+  # Bounds on what the EPP may hold, so an overloaded pool can't build an
+  # unbounded backlog.
+  defaultRequestTTL: 90s
+  noEndpointRequestTTL: 30s
+  maxRequests: "1024"
+  maxBytes: 1Gi
+  saturationDetector:
+    pluginRef: concurrency-detector
+  usageLimitPolicyPluginRef: priority-holdback
+  # Requests whose objective isn't listed below still get RR + FCFS.
+  defaultPriorityBand:
+    fairnessPolicyRef: round-robin-fairness-policy
+    orderingPolicyRef: fcfs-ordering-policy
+  defaultNegativePriorityBand:
+    fairnessPolicyRef: round-robin-fairness-policy
+    orderingPolicyRef: fcfs-ordering-policy
+  priorityBands:
+    # realtime: may use the full measured capacity.
+    - priority: 100
+      maxRequests: "512"
+      fairnessPolicyRef: round-robin-fairness-policy
+      orderingPolicyRef: fcfs-ordering-policy
+    # standard: held back at 75%; the remaining 25% is reserved for realtime.
+    - priority: 0
+      maxRequests: "384"
+      fairnessPolicyRef: round-robin-fairness-policy
+      orderingPolicyRef: fcfs-ordering-policy
+    # batch: held back at 50%; negative priority means it is sheddable when
+    # its band limit is reached.
+    - priority: -10
+      maxRequests: "256"
+      fairnessPolicyRef: round-robin-fairness-policy
+      orderingPolicyRef: fcfs-ordering-policy

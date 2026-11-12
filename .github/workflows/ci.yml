@@ -1,0 +1,77 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.17.2
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          activate-environment: true
+      - run: uv pip install -e '.[dev]'
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q
+
+  charts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.17.2
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.6/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Committed router variants match epp.yaml + variants.yaml
+        run: |
+          deploy/router/render-variants.sh
+          git diff --exit-code -- deploy/router/variants
+      - name: Lint and render the charts
+        run: |
+          helm lint charts/pd-pool
+          helm template pd-pool charts/pd-pool > /dev/null
+          helm template pd-pool charts/pd-pool --set monitoring.enabled=false > /dev/null
+          helm template pd-pool charts/pd-pool --set model.hfToken.secretName=llm-d-hf-token,persistence.enabled=false,decode.tensorParallelSize=4 > /dev/null
+      - name: Render the router chart with every variant
+        run: |
+          base=https://raw.githubusercontent.com/llm-d/llm-d/v1.0.0/guides/recipes/router/base.values.yaml
+          for f in deploy/router/variants/*.yaml; do
+            helm template priority-queue oci://ghcr.io/llm-d/charts/llm-d-router-standalone --version v1.0.0 \
+              -f $base -f deploy/router/values.yaml \
+              --set-file "router.epp.pluginsCustomConfig.custom-plugins\.yaml=$f" > /dev/null
+            echo "$f renders"
+          done
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: pqbench:ci
+      - name: Smoke test
+        run: |
+          docker run --rm pqbench:ci --version
+          docker run --rm pqbench:ci scenarios
+          docker image ls pqbench:ci --format 'image size: {{.Size}}'

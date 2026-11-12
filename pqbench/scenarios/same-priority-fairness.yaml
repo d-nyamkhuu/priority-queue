@@ -1,0 +1,18 @@
+# Can one tenant starve its peers in the same priority band?
+# A, B and C are all realtime (same band). A bursts to ~5x its share.
+# Round-robin fairness gives each tenant queue its turn, so B and C keep
+# making progress while A's own queue absorbs most of the surge latency.
+# Admission is per band, not per tenant: while A's burst keeps the realtime
+# band at maxRequests, new requests from every tenant (B and C included) get
+# 429. Fairness decides dispatch order among admitted requests.
+name: same-priority-fairness
+variants: [hybrid, no-flow-control]
+phases:
+  - {name: warmup, duration_s: 30}
+  - {name: surge, duration_s: 120}
+  - {name: cooldown, duration_s: 60}
+measure_phases: [surge]
+tenants:
+  - {name: realtime-a, objective: realtime, rate: {warmup: 0.25, surge: 1.4, cooldown: 0.25}}
+  - {name: realtime-b, objective: realtime, rate: 0.25}
+  - {name: realtime-c, objective: realtime, rate: 0.25}

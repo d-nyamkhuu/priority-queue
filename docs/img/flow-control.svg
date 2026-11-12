@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540" width="1000" height="540" role="img" aria-label="Flow control: a request is admitted into a queue keyed by tenant and priority; the dispatcher picks the highest band, then a tenant by round robin, then the oldest request, and sends it on only if the gate is open">
+<title>Flow control: a request is admitted into a queue keyed by tenant and priority; the dispatcher picks the highest band, then a tenant by round robin, then the oldest request, and sends it on only if the gate is open</title>
+<defs><marker id="arr-d16e61" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d16e61"/></marker><marker id="arr-7d8ca0" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d8ca0"/></marker><marker id="arr-2b4c7e" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b4c7e"/></marker><marker id="arr-526173" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#526173"/></marker><marker id="arr-a8352b" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a8352b"/></marker><marker id="arr-d16e61" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d16e61"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="539" rx="0" fill="#ffffff" stroke="none"/>
+<rect x="20" y="206" width="160" height="88" rx="0" fill="#ffffff" stroke="#526173" stroke-width="1.5"/>
+<text x="100" y="230" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">request</text>
+<text x="100" y="252" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">objective: realtime</text>
+<text x="100" y="269" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">fairness-id: tenant-a</text>
+<path d="M180,250 L208,250" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<rect x="210" y="206" width="150" height="88" rx="0" fill="#ffffff" stroke="#18283f" stroke-width="1.5"/>
+<circle cx="232" cy="226" r="10" fill="#18283f"/>
+<text x="232" y="230.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">1</text>
+<text x="296" y="231" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">admit</text>
+<text x="285" y="256" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="middle" font-weight="normal">flow key =</text>
+<text x="285" y="273" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="middle" font-weight="normal">(tenant, priority)</text>
+<path d="M285,294 L285,360" fill="none" stroke="#a8352b" stroke-width="1.6" marker-end="url(#arr-a8352b)" stroke-linejoin="round"/>
+<rect x="215" y="362" width="140" height="46" rx="0" fill="#ffffff" stroke="#a8352b" stroke-width="1.5"/>
+<text x="285" y="381" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="middle" font-weight="bold">429 at once</text>
+<text x="285" y="398" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#a8352b" text-anchor="middle" font-weight="normal">band is full</text>
+<rect x="400" y="60" width="300" height="120" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.5"/>
+<text x="412" y="80" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">priority 100 · realtime</text>
+<text x="412" y="114" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#18283f" text-anchor="start" font-weight="normal">tenant-a</text>
+<line x1="480" y1="118" x2="684" y2="118" stroke="#e6eaef" stroke-width="1"/>
+<rect x="666" y="102" width="12" height="14" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.2"/>
+<rect x="650" y="102" width="12" height="14" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.2"/>
+<rect x="634" y="102" width="12" height="14" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.2"/>
+<text x="412" y="150" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#18283f" text-anchor="start" font-weight="normal">tenant-b</text>
+<line x1="480" y1="154" x2="684" y2="154" stroke="#e6eaef" stroke-width="1"/>
+<rect x="666" y="138" width="12" height="14" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-width="1.2"/>
+<path d="M362,250 L398,120.0" fill="none" stroke="#2b4c7e" stroke-width="1.6" marker-end="url(#arr-2b4c7e)" stroke-linejoin="round"/>
+<rect x="400" y="200" width="300" height="100" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.5"/>
+<text x="412" y="220" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#7d8ca0" text-anchor="start" font-weight="bold">priority 0 · standard</text>
+<text x="412" y="254" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#18283f" text-anchor="start" font-weight="normal">tenant-c</text>
+<line x1="480" y1="258" x2="684" y2="258" stroke="#e6eaef" stroke-width="1"/>
+<rect x="666" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="650" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="634" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="618" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="602" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="586" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="570" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="554" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="538" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="522" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="506" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<rect x="490" y="242" width="12" height="14" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-width="1.2"/>
+<path d="M362,250 L398,250.0" fill="none" stroke="#7d8ca0" stroke-width="1.6" marker-end="url(#arr-7d8ca0)" stroke-linejoin="round"/>
+<rect x="400" y="320" width="300" height="100" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.5"/>
+<text x="412" y="340" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#b4503f" text-anchor="start" font-weight="bold">priority −10 · batch</text>
+<text x="412" y="374" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12" fill="#18283f" text-anchor="start" font-weight="normal">bronze</text>
+<line x1="480" y1="378" x2="684" y2="378" stroke="#e6eaef" stroke-width="1"/>
+<rect x="666" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="650" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="634" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="618" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="602" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="586" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<rect x="570" y="362" width="12" height="14" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.2"/>
+<path d="M362,250 L398,370.0" fill="none" stroke="#d16e61" stroke-width="1.6" marker-end="url(#arr-d16e61)" stroke-linejoin="round"/>
+<text x="684" y="52" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="end" font-weight="normal">oldest →</text>
+<text x="412" y="52" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">one queue per (tenant, priority)</text>
+<path d="M550,420 L550,462" fill="none" stroke="#a8352b" stroke-width="1.6" marker-end="url(#arr-a8352b)" stroke-linejoin="round"/>
+<rect x="470" y="464" width="160" height="46" rx="0" fill="#ffffff" stroke="#a8352b" stroke-width="1.5"/>
+<text x="550" y="483" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="middle" font-weight="bold">429 · TTL expired</text>
+<text x="550" y="500" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#a8352b" text-anchor="middle" font-weight="normal">queued over 90 s</text>
+<line x1="700" y1="120" x2="720" y2="120" stroke="#526173" stroke-width="1.6"/>
+<line x1="700" y1="250" x2="720" y2="250" stroke="#526173" stroke-width="1.6"/>
+<line x1="700" y1="370" x2="720" y2="370" stroke="#526173" stroke-width="1.6"/>
+<line x1="720" y1="88" x2="720" y2="370" stroke="#526173" stroke-width="1.6"/>
+<path d="M720,88 L738,88" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<rect x="740" y="60" width="200" height="56" rx="0" fill="#ffffff" stroke="#526173" stroke-width="1.5"/>
+<circle cx="760" cy="78" r="10" fill="#18283f"/>
+<text x="760" y="82.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">2</text>
+<text x="850" y="83" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">pick band</text>
+<text x="840" y="103" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">highest priority with work</text>
+<rect x="740" y="136" width="200" height="56" rx="0" fill="#ffffff" stroke="#526173" stroke-width="1.5"/>
+<circle cx="760" cy="154" r="10" fill="#18283f"/>
+<text x="760" y="158.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">3</text>
+<text x="850" y="159" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">pick tenant</text>
+<text x="840" y="179" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">round robin inside the band</text>
+<rect x="740" y="212" width="200" height="56" rx="0" fill="#ffffff" stroke="#526173" stroke-width="1.5"/>
+<circle cx="760" cy="230" r="10" fill="#18283f"/>
+<text x="760" y="234.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">4</text>
+<text x="850" y="235" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">pick request</text>
+<text x="840" y="255" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">oldest first (FCFS)</text>
+<path d="M840,116 L840,134" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<path d="M840,192 L840,210" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<path d="M840,268 L840,286" fill="none" stroke="#526173" stroke-width="1.6" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<rect x="740" y="288" width="200" height="78" rx="0" fill="#ffffff" stroke="#a8352b" stroke-width="1.5"/>
+<circle cx="760" cy="306" r="10" fill="#a8352b"/>
+<text x="760" y="310.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">5</text>
+<text x="850" y="311" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">gate open?</text>
+<text x="840" y="332" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="middle" font-weight="normal">pool saturation &lt; 1.0</text>
+<text x="840" y="348" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="middle" font-weight="normal">band under its ceiling</text>
+<path d="M940,327 L966,327 L966,88 L942,88" fill="none" stroke="#a8352b" stroke-width="1.6" marker-end="url(#arr-a8352b)" stroke-linejoin="round"/>
+<text x="958" y="210" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#a8352b" text-anchor="middle" font-weight="normal" transform="rotate(-90 958 210)">no: wait</text>
+<path d="M840,366 L840,398" fill="none" stroke="#526173" stroke-width="2" marker-end="url(#arr-526173)" stroke-linejoin="round"/>
+<text x="848" y="387" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="bold">yes</text>
+<rect x="740" y="400" width="200" height="56" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.5"/>
+<circle cx="760" cy="418" r="10" fill="#d16e61"/>
+<text x="760" y="422.5" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">6</text>
+<text x="850" y="423" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="middle" font-weight="bold">P/D scheduler</text>
+<text x="840" y="443" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">picks prefill + decode pods</text>
+<path d="M840,456 L840,500" fill="none" stroke="#d16e61" stroke-width="1.6" marker-end="url(#arr-d16e61)" stroke-linejoin="round"/>
+<text x="850" y="492" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">to the GPUs</text>
+</svg>

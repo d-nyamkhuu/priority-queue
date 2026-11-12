@@ -1,0 +1,24 @@
+{{- if .Values.monitoring.enabled }}
+{{- range $role := list "prefill" "decode" }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "pd-pool.fullname" $ }}-{{ $role }}
+  labels:
+    {{- include "pd-pool.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $role }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "pd-pool.selectorLabels" $ | nindent 6 }}
+      llm-d.ai/role: {{ $role }}
+  # Keep the role on every series: pqbench and the dashboard split by it.
+  podTargetLabels: [llm-d.ai/role]
+  podMetricsEndpoints:
+    - port: modelserver
+      path: /metrics
+      # Upstream scrapes every 30 s; pqbench wants 1 Hz timelines.
+      interval: {{ $.Values.monitoring.interval }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" width="1100" height="500" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif">
+  <title>Architecture: tenants, llm-d router with flow control, and a prefill/decode GPU pool</title>
+  <!-- Colours and text sizes match the charts in results/figures (pqbench/figures.py). -->
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#526173"/>
+    </marker>
+    <marker id="ah-kv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#18283f"/>
+    </marker>
+    <style>
+      .t  { fill: #18283f; }
+      .s  { fill: #526173; }
+      .m  { fill: #8c98a5; }
+      .h1 { font-size: 20px; font-weight: 700; }
+      .h2 { font-size: 15px; font-weight: 700; }
+      .h3 { font-size: 14px; font-weight: 700; }
+      .b  { font-size: 14px; }
+      .sm { font-size: 13px; }
+      .bd { font-weight: 700; }
+      .cap { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
+      .arrow { stroke: #526173; stroke-width: 1.6; fill: none; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="500" fill="#ffffff"/>
+
+  <text x="24" y="38" class="t h1">Architecture</text>
+  <text x="24" y="62" class="s b">Qwen3.5-9B on 2 GPUs · llm-d v1.0.0 router · vLLM v0.31 with NIXL KV transfer</text>
+
+  <!-- ============ tenants ============ -->
+  <text x="24" y="168" class="m cap">TENANTS</text>
+  <text x="24" y="186" class="s sm">priority and tenant</text>
+  <text x="24" y="201" class="s sm">set by HTTP headers</text>
+
+  <rect x="24" y="211" width="140" height="30" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <circle cx="40" cy="226" r="5" fill="#2b4c7e"/>
+  <text x="52" y="230.5" class="t b bd">Tenant A</text>
+  <rect x="24" y="245" width="140" height="30" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <circle cx="40" cy="260" r="5" fill="#2b4c7e"/>
+  <text x="52" y="264.5" class="t b bd">Tenant B</text>
+  <rect x="24" y="319" width="140" height="30" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <circle cx="40" cy="334" r="5" fill="#7d8ca0"/>
+  <text x="52" y="338.5" class="t b bd">Tenant C</text>
+  <rect x="24" y="387" width="140" height="30" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <circle cx="40" cy="402" r="5" fill="#d16e61"/>
+  <text x="52" y="406.5" class="t b bd">Batch job</text>
+
+  <!-- ============ router ============ -->
+  <rect x="192" y="86" width="584" height="388" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="208" y="112" class="t h2">llm-d router</text>
+  <text x="760" y="112" class="s sm" text-anchor="end">Envoy + Endpoint Picker · CPU node</text>
+
+  <!-- panel 1: queues -->
+  <rect x="204" y="128" width="216" height="334" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="218" y="152" class="t h3">① Queues</text>
+  <text x="218" y="170" class="s sm">a band per priority, a queue</text>
+  <text x="218" y="185" class="s sm">per tenant, round robin</text>
+
+  <rect x="214" y="196" width="196" height="88" rx="0" fill="#ffffff" stroke="#2b4c7e" stroke-opacity="0.45"/>
+  <text x="224" y="212" class="t sm bd">realtime · 100</text>
+  <text x="400" y="212" class="s sm" text-anchor="end">≤ 512</text>
+  <rect x="224" y="217" width="176" height="20" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="232" y="231" class="s sm bd">A</text>
+  <g fill="#2b4c7e"><rect x="338" y="221" width="12" height="12" rx="0"/><rect x="354" y="221" width="12" height="12" rx="0"/><rect x="370" y="221" width="12" height="12" rx="0"/><rect x="386" y="221" width="10" height="12" rx="0"/></g>
+  <rect x="224" y="251" width="176" height="20" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="232" y="265" class="s sm bd">B</text>
+  <g fill="#2b4c7e"><rect x="370" y="255" width="12" height="12" rx="0"/><rect x="386" y="255" width="10" height="12" rx="0"/></g>
+
+  <rect x="214" y="296" width="196" height="54" rx="0" fill="#ffffff" stroke="#7d8ca0" stroke-opacity="0.5"/>
+  <text x="224" y="312" class="t sm bd">standard · 0</text>
+  <text x="400" y="312" class="s sm" text-anchor="end">≤ 384</text>
+  <rect x="224" y="324" width="176" height="20" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="232" y="338" class="s sm bd">C</text>
+  <g fill="#7d8ca0"><rect x="322" y="328" width="12" height="12" rx="0"/><rect x="338" y="328" width="12" height="12" rx="0"/><rect x="354" y="328" width="12" height="12" rx="0"/><rect x="370" y="328" width="12" height="12" rx="0"/><rect x="386" y="328" width="10" height="12" rx="0"/></g>
+
+  <rect x="214" y="362" width="196" height="58" rx="0" fill="#ffffff" stroke="#d16e61" stroke-opacity="0.5"/>
+  <text x="224" y="378" class="t sm bd">batch · −10</text>
+  <text x="400" y="378" class="s sm" text-anchor="end">≤ 256</text>
+  <rect x="224" y="392" width="176" height="20" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="232" y="406" class="s sm bd">job</text>
+  <g fill="#d16e61"><rect x="258" y="396" width="12" height="12" rx="0"/><rect x="274" y="396" width="12" height="12" rx="0"/><rect x="290" y="396" width="12" height="12" rx="0"/><rect x="306" y="396" width="12" height="12" rx="0"/><rect x="322" y="396" width="12" height="12" rx="0"/><rect x="338" y="396" width="12" height="12" rx="0"/><rect x="354" y="396" width="12" height="12" rx="0"/><rect x="370" y="396" width="12" height="12" rx="0"/><rect x="386" y="396" width="10" height="12" rx="0"/></g>
+  <text x="218" y="444" class="m sm">higher band dispatches first</text>
+
+  <!-- panel 2: admission -->
+  <rect x="432" y="128" width="168" height="334" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="446" y="152" class="t h3">② Admission</text>
+  <text x="446" y="170" class="s sm">dispatch only while</text>
+  <text x="446" y="185" class="s sm">the pool has room</text>
+
+  <rect x="442" y="196" width="148" height="94" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="452" y="214" class="t sm bd">Hybrid detector</text>
+  <text x="452" y="234" class="s sm">requests ≤ 64</text>
+  <text x="452" y="252" class="s sm">prompt tokens ≤ 30k</text>
+  <text x="452" y="270" class="s sm">per P/D stage</text>
+
+  <rect x="442" y="302" width="148" height="148" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="452" y="320" class="t sm bd">Holdback</text>
+  <text x="452" y="340" class="s sm">realtime</text><text x="580" y="340" class="t sm bd" text-anchor="end">100%</text>
+  <rect x="452" y="346" width="128" height="8" rx="0" fill="#e6eaef"/><rect x="452" y="346" width="128" height="8" rx="0" fill="#2b4c7e"/>
+  <text x="452" y="374" class="s sm">standard</text><text x="580" y="374" class="t sm bd" text-anchor="end">75%</text>
+  <rect x="452" y="380" width="128" height="8" rx="0" fill="#e6eaef"/><rect x="452" y="380" width="96" height="8" rx="0" fill="#7d8ca0"/>
+  <text x="452" y="408" class="s sm">batch</text><text x="580" y="408" class="t sm bd" text-anchor="end">50%</text>
+  <rect x="452" y="414" width="128" height="8" rx="0" fill="#e6eaef"/><rect x="452" y="414" width="64" height="8" rx="0" fill="#d16e61"/>
+  <text x="452" y="440" class="m sm">of capacity per class</text>
+
+  <!-- panel 3: scheduler -->
+  <rect x="612" y="128" width="152" height="334" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="626" y="152" class="t h3">③ Scheduler</text>
+  <text x="626" y="170" class="s sm">splits every request</text>
+  <text x="626" y="185" class="s sm">across two pods</text>
+
+  <rect x="622" y="196" width="132" height="50" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="632" y="216" class="t sm bd">decode pod</text>
+  <text x="632" y="234" class="s sm">least busy</text>
+  <rect x="622" y="256" width="132" height="50" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="632" y="276" class="t sm bd">prefill pod</text>
+  <text x="632" y="294" class="s sm">least busy</text>
+
+  <!-- arrows inside the router (drawn after the panels so they stay on top) -->
+  <path d="M164,226 H222" class="arrow" marker-end="url(#ah)"/>
+  <path d="M164,260 H222" class="arrow" marker-end="url(#ah)"/>
+  <path d="M164,334 H222" class="arrow" marker-end="url(#ah)"/>
+  <path d="M164,402 H222" class="arrow" marker-end="url(#ah)"/>
+  <path d="M420,295 H430" class="arrow" marker-end="url(#ah)"/>
+  <path d="M600,295 H610" class="arrow" marker-end="url(#ah)"/>
+
+  <!-- ① router -> decode sidecar -->
+  <path d="M754,221 H808" class="arrow" marker-end="url(#ah)"/>
+  <circle cx="786" cy="221" r="10" fill="#ffffff" stroke="#526173"/>
+  <text x="786" y="225.5" class="t sm bd" text-anchor="middle">1</text>
+
+  <!-- ============ GPU pool ============ -->
+  <rect x="796" y="118" width="280" height="150" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="810" y="140" class="m cap">GPU NODE B</text>
+  <text x="810" y="162" class="t h2">Decode pod</text>
+  <rect x="810" y="176" width="112" height="78" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="820" y="196" class="t sm bd">sidecar</text>
+  <text x="820" y="215" class="s sm">calls prefill,</text>
+  <text x="820" y="232" class="s sm">then decodes</text>
+  <rect x="932" y="176" width="130" height="78" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="942" y="196" class="t sm bd">vLLM</text>
+  <text x="942" y="215" class="s sm">pulls KV, streams</text>
+  <text x="942" y="232" class="s sm">tokens to client</text>
+
+  <rect x="796" y="328" width="280" height="134" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <rect x="810" y="342" width="252" height="56" rx="0" fill="#ffffff" stroke="#c3cbd5"/>
+  <text x="820" y="363" class="t sm bd">vLLM</text>
+  <text x="820" y="382" class="s sm">reads the prompt, builds the KV cache</text>
+  <text x="810" y="428" class="t h2">Prefill pod</text>
+  <text x="810" y="448" class="m cap">GPU NODE A</text>
+
+  <!-- ② sidecar -> prefill -->
+  <path d="M866,254 V340" class="arrow" marker-end="url(#ah)"/>
+  <circle cx="866" cy="296" r="10" fill="#ffffff" stroke="#526173"/>
+  <text x="866" y="300.5" class="t sm bd" text-anchor="middle">2</text>
+  <text x="882" y="300.5" class="s sm">prefill</text>
+
+  <!-- ③ KV pull prefill -> decode vLLM -->
+  <path d="M966,342 V256" stroke="#18283f" stroke-width="2.2" fill="none" marker-end="url(#ah-kv)"/>
+  <circle cx="966" cy="296" r="10" fill="#ffffff" stroke="#18283f"/>
+  <text x="966" y="300.5" class="sm bd" fill="#18283f" text-anchor="middle">3</text>
+  <text x="982" y="292" class="sm bd" fill="#18283f">KV ~69 MB</text>
+  <text x="982" y="308" class="s sm">NIXL over TCP</text>
+</svg>

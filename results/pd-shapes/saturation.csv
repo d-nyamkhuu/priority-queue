@@ -1,0 +1,7 @@
+variant,phase,peak_saturation_decode,peak_saturation_effective,peak_saturation_prefill
+hybrid,decode-surge,1.0208,1.0208,1.0208
+hybrid,prefill-surge,1.056,1.056,1.056
+requests,decode-surge,0.875,0.875,0.6875
+requests,prefill-surge,0.8125,0.8125,0.796875
+tokens,decode-surge,0.9328,0.9328,0.9328
+tokens,prefill-surge,1.0736,1.0736,1.0736

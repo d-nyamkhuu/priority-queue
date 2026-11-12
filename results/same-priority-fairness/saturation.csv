@@ -1,0 +1,3 @@
+variant,phase,peak_saturation_decode,peak_saturation_effective,peak_saturation_prefill
+hybrid,surge,1.0,1.0,0.4928
+no-flow-control,surge,,,

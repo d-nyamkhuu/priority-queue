@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 345" width="1000" height="345" role="img" aria-label="Hybrid detector: long prompts fill the token limit while the request count stays low, and long answers do the opposite; only max(request ratio, token ratio) closes the gate for both">
+<title>Hybrid detector: long prompts fill the token limit while the request count stays low, and long answers do the opposite; only max(request ratio, token ratio) closes the gate for both</title>
+<defs></defs>
+<rect x="0.5" y="0.5" width="999" height="344" rx="0" fill="#ffffff" stroke="none"/>
+<text x="30" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">Prefill-heavy surge</text>
+<text x="30" y="55" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">4,096-token prompts, 32-token answers (per pod, illustrative)</text>
+<text x="30" y="82" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">in-flight requests</text>
+<text x="370" y="82" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#526173" text-anchor="end" font-weight="normal">8 / 64</text>
+<rect x="30" y="90" width="338.0" height="18" rx="0" fill="#ffffff" stroke="#c3cbd5" stroke-width="1.5"/>
+<rect x="30" y="90" width="32.5" height="18" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.5"/>
+<text x="68.5" y="104" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="start" font-weight="bold">0.12</text>
+<line x1="290" y1="85" x2="290" y2="113" stroke="#a8352b" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="30" y="134" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">in-flight prompt tokens</text>
+<text x="370" y="134" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#526173" text-anchor="end" font-weight="normal">32,768 / 30,000</text>
+<rect x="30" y="142" width="338.0" height="18" rx="0" fill="#ffffff" stroke="#c3cbd5" stroke-width="1.5"/>
+<rect x="30" y="142" width="283.9893333333333" height="18" rx="0" fill="#ffffff" stroke="#a8352b" stroke-width="1.5"/>
+<text x="319.9893333333333" y="156" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="start" font-weight="bold">1.09</text>
+<line x1="290" y1="137" x2="290" y2="165" stroke="#a8352b" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="290" y="186" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#a8352b" text-anchor="middle" font-weight="normal">limit = 1.0</text>
+<text x="30" y="246" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">requests detector</text>
+<text x="230" y="246" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 0.12</text>
+<text x="330" y="246" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="start" font-weight="bold">misses it ✗</text>
+<text x="30" y="280" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">tokens detector</text>
+<text x="230" y="280" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 1.09</text>
+<text x="330" y="280" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">gate closes ✓</text>
+<text x="30" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="bold">hybrid = max of both</text>
+<text x="230" y="314" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 1.09</text>
+<text x="330" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">gate closes ✓</text>
+<line x1="500" y1="20" x2="500" y2="325" stroke="#e6eaef" stroke-width="1"/>
+<text x="530" y="36" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#18283f" text-anchor="start" font-weight="bold">Decode-heavy surge</text>
+<text x="530" y="55" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">256-token prompts, 1,024-token answers (per pod, illustrative)</text>
+<text x="530" y="82" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">in-flight requests</text>
+<text x="870" y="82" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#526173" text-anchor="end" font-weight="normal">70 / 64</text>
+<rect x="530" y="90" width="338.0" height="18" rx="0" fill="#ffffff" stroke="#c3cbd5" stroke-width="1.5"/>
+<rect x="530" y="90" width="284.375" height="18" rx="0" fill="#ffffff" stroke="#a8352b" stroke-width="1.5"/>
+<text x="820.375" y="104" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="start" font-weight="bold">1.09</text>
+<line x1="790" y1="85" x2="790" y2="113" stroke="#a8352b" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="530" y="134" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">in-flight prompt tokens</text>
+<text x="870" y="134" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#526173" text-anchor="end" font-weight="normal">17,920 / 30,000</text>
+<rect x="530" y="142" width="338.0" height="18" rx="0" fill="#ffffff" stroke="#c3cbd5" stroke-width="1.5"/>
+<rect x="530" y="142" width="155.30666666666667" height="18" rx="0" fill="#ffffff" stroke="#d16e61" stroke-width="1.5"/>
+<text x="691.3066666666666" y="156" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#18283f" text-anchor="start" font-weight="bold">0.60</text>
+<line x1="790" y1="137" x2="790" y2="165" stroke="#a8352b" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="790" y="186" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#a8352b" text-anchor="middle" font-weight="normal">limit = 1.0</text>
+<text x="530" y="246" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">requests detector</text>
+<text x="730" y="246" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 1.09</text>
+<text x="830" y="246" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">gate closes ✓</text>
+<text x="530" y="280" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">tokens detector</text>
+<text x="730" y="280" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 0.60</text>
+<text x="830" y="280" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="start" font-weight="bold">misses it ✗</text>
+<text x="530" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="start" font-weight="bold">hybrid = max of both</text>
+<text x="730" y="314" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" fill="#18283f" text-anchor="start" font-weight="normal">sees 1.09</text>
+<text x="830" y="314" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">gate closes ✓</text>
+</svg>

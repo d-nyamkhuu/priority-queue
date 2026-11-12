@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Priority holdback: realtime may dispatch up to 100% of pool capacity, standard up to 75%, batch up to 50%; at 55% saturation only batch is held back">
+<title>Priority holdback: realtime may dispatch up to 100% of pool capacity, standard up to 75%, batch up to 50%; at 55% saturation only batch is held back</title>
+<defs></defs>
+<rect x="0.5" y="0.5" width="899" height="299" rx="0" fill="#ffffff" stroke="none"/>
+<rect x="600.0" y="46" width="150.0" height="178" rx="0" fill="#eef1f5" stroke="none" stroke-width="1.5"/>
+<rect x="450.0" y="46" width="150.0" height="178" rx="0" fill="#f4f6f8" stroke="none" stroke-width="1.5"/>
+<text x="138" y="81" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#2b4c7e" text-anchor="end" font-weight="bold">realtime</text>
+<rect x="150" y="60" width="600.0" height="30" rx="0" fill="#eef1f5" stroke="#2b4c7e" stroke-width="1.5"/>
+<text x="742.0" y="80" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="end" font-weight="bold">ceiling 100%</text>
+<text x="138" y="141" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#7d8ca0" text-anchor="end" font-weight="bold">standard</text>
+<rect x="150" y="120" width="450.0" height="30" rx="0" fill="#f4f6f8" stroke="#7d8ca0" stroke-width="1.5"/>
+<text x="592.0" y="140" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#7d8ca0" text-anchor="end" font-weight="bold">ceiling 75%</text>
+<text x="138" y="201" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#b4503f" text-anchor="end" font-weight="bold">batch</text>
+<rect x="150" y="180" width="300.0" height="30" rx="0" fill="#fbefed" stroke="#d16e61" stroke-width="1.5"/>
+<text x="442.0" y="200" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#b4503f" text-anchor="end" font-weight="bold">ceiling 50%</text>
+<line x1="480.0" y1="40" x2="480.0" y2="226" stroke="#18283f" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="480.0" y="34" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#18283f" text-anchor="middle" font-weight="bold">pool saturation now: 55%</text>
+<text x="762.0" y="81" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">✓ dispatches</text>
+<text x="762.0" y="141" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#2b4c7e" text-anchor="start" font-weight="bold">✓ dispatches</text>
+<text x="762.0" y="201" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#a8352b" text-anchor="start" font-weight="bold">✗ held back</text>
+<line x1="150" y1="236" x2="750" y2="236" stroke="#526173" stroke-width="1"/>
+<line x1="150" y1="236" x2="150" y2="242" stroke="#526173" stroke-width="1"/>
+<text x="150" y="257" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">0%</text>
+<line x1="300.0" y1="236" x2="300.0" y2="242" stroke="#526173" stroke-width="1"/>
+<text x="300.0" y="257" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">25%</text>
+<line x1="450.0" y1="236" x2="450.0" y2="242" stroke="#526173" stroke-width="1"/>
+<text x="450.0" y="257" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">50%</text>
+<line x1="600.0" y1="236" x2="600.0" y2="242" stroke="#526173" stroke-width="1"/>
+<text x="600.0" y="257" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">75%</text>
+<line x1="750" y1="236" x2="750" y2="242" stroke="#526173" stroke-width="1"/>
+<text x="750" y="257" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">100%</text>
+<text x="675.0" y="282" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#2b4c7e" text-anchor="middle" font-weight="normal">kept free for realtime</text>
+<text x="525.0" y="282" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="middle" font-weight="normal">standard + realtime only</text>
+<text x="150" y="282" font-family="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#526173" text-anchor="start" font-weight="normal">share of measured pool capacity</text>
+</svg>

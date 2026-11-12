@@ -1,0 +1,72 @@
+# Helm values for oci://ghcr.io/llm-d/charts/llm-d-router-standalone (v1.0.0),
+# layered on top of upstream guides/recipes/router/base.values.yaml.
+#
+# Standalone mode: the EPP pod carries an Envoy sidecar that clients call
+# directly, so no Gateway API controller is needed. The EndpointPickerConfig
+# itself (variants/<name>.yaml) is passed with --set-file; see README.
+#
+# Chart v1.0.0 has no nodeSelector/tolerations for the EPP pod, so it lands on
+# any untainted node (taint GPU nodes to keep it off them).
+router:
+  # The Service exposes Envoy on :80. The chart already exposes metrics on :9090.
+  extraServicePorts:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8081
+
+  epp:
+    # Single replica: flow-control queues and in-flight accounting are local
+    # to one EPP process.
+    replicas: 1
+    image:
+      tag: v1.0.0
+      pullPolicy: IfNotPresent
+    pluginsConfigFile: "custom-plugins.yaml"
+    # Sized for one 8 vCPU CPU node shared with the load generator.
+    # Upstream defaults (4 vCPU / 8 GiB each for EPP and Envoy) target
+    # production traffic far above this benchmark's tens of requests/s.
+    resources:
+      requests:
+        cpu: "2"
+        memory: 2Gi
+      limits:
+        memory: 4Gi
+
+  proxy:
+    args:
+      - "--service-node"
+      - "envoy-sidecar"
+      - "--log-level"
+      - "warn"
+      - "--concurrency"
+      - "2"
+      - "--drain-strategy"
+      - "immediate"
+      - "--drain-time-s"
+      - "60"
+      - "-c"
+      - "/etc/envoy/envoy.yaml"
+    resources:
+      requests:
+        cpu: "1"
+        memory: 1Gi
+      limits:
+        memory: 2Gi
+
+  # Metrics auth is off, so the bench sampler can scrape :9090/metrics. The
+  # ServiceMonitor is only for watching a run in Grafana (README, "Optional:
+  # live Grafana dashboard"): --set router.monitoring.prometheus.enabled=true
+  # with kube-prometheus-stack.
+  monitoring:
+    interval: "5s"
+    prometheus:
+      enabled: false
+      auth:
+        enabled: false
+
+  # The InferencePool selects both prefill and decode pods by this label.
+  # Must match modelServers.matchLabels in charts/pd-pool/values.yaml.
+  modelServers:
+    matchLabels:
+      llm-d.ai/guide: priority-queue

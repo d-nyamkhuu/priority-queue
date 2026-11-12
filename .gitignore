@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.env
+
+# Local scratch: an empty DOCKER_CONFIG for Helm OCI pulls (.pq), and one-off
+# tools and their results that aren't part of the benchmark (local).
+.pq/
+local/
+
+# Large per-run files: the 1 Hz sampler dumps. Cluster snapshots and pod logs hold
+# node IDs and private IPs, so they stay local too.
+results/**/metrics.csv
+results/**/cluster/
+results/**/logs/

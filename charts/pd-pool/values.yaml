@@ -1,0 +1,187 @@
+# Values for the pd-pool chart: everything except the router.
+# The defaults match the published run: Qwen3.5-9B, one prefill and one
+# decode vLLM pod at TP1 (on single-GPU nodes, so KV moves over TCP).
+#
+# Keys shared with the llm-d router chart (llm-d-router-standalone) use its
+# names without the router. prefix: modelServers.matchLabels and
+# inferenceObjectives.
+
+# --------------------------------------------------------------- model ---
+model:
+  # Hugging Face repo id, passed to `vllm serve` and downloaded into the cache.
+  name: Qwen/Qwen3.5-9B
+  # Hugging Face revision (branch, tag or commit SHA). Pin a commit SHA so the
+  # cache and every pod serve the same files. Empty = the repo's main branch.
+  revision: ""
+  # Secret holding a Hugging Face token, for gated models. Upstream llm-d
+  # guides name it llm-d-hf-token. Empty = download anonymously.
+  hfToken:
+    secretName: ""
+    key: HF_TOKEN
+
+# --------------------------------------------------------------- router ---
+router:
+  # Helm release name of the llm-d-router-standalone chart. Standalone mode
+  # creates no InferencePool object, but the router still names its pool after
+  # the release, and the InferenceObjectives below reference that name.
+  releaseName: priority-queue
+
+# Traffic classes, same shape as the router chart's router.inferenceObjectives
+# (which standalone mode doesn't allow, so this chart creates them). Clients
+# pick one with the header
+#   x-llm-d-inference-objective: <name>
+# and their tenant queue with
+#   x-llm-d-inference-fairness-id: <tenant>
+# Negative priority = sheddable. Never trust these headers from end users in
+# production: set them at the edge from the caller's verified identity.
+inferenceObjectives:
+  - name: realtime
+    priority: 100
+  - name: standard
+    priority: 0
+  - name: batch
+    priority: -10
+
+# -------------------------------------------------------- model servers ---
+modelServers:
+  # The router selects model-server pods by these labels. Must match
+  # router.modelServers.matchLabels in deploy/router/values.yaml.
+  matchLabels:
+    llm-d.ai/guide: priority-queue
+
+  # The vLLM release llm-d v1.0 pins.
+  image:
+    registry: docker.io
+    repository: vllm/vllm-openai
+    tag: v0.31.0
+    pullPolicy: IfNotPresent
+
+  # Engine flags for both roles. Prefill and decode must serve the same model
+  # with the same KV block size; tensor parallelism is per role (below).
+  args:
+    - "--disable-access-log-for-endpoints=/health,/metrics,/v1/models"
+    # Qwen3.5 is a vision-language model. Text-only skips the vision tower
+    # and leaves more memory for KV cache.
+    - "--language-model-only"
+    # Engine limits.
+    - "--max-model-len=32768"
+    - "--max-num-batched-tokens=8192"
+    - "--max-num-seqs=128"
+    - "--gpu-memory-utilization=0.90"
+    # Prefix caching is off, so every request
+    # costs a full prefill.
+    - "--no-enable-prefix-caching"
+    # Qwen3.5 mixes Gated DeltaNet (linear attention) with full attention.
+    # The hybrid KV cache manager has to stay on so NIXL transfers both the
+    # KV blocks and the SSM state. vLLM picks the attention block size to
+    # match the SSM page size (528 tokens here), the same on both roles.
+    - "--no-disable-hybrid-kv-cache-manager"
+    - "--shutdown-timeout=45"
+  # NIXL connector config; kv_role is filled in per role.
+  kvTransfer:
+    kv_connector: NixlConnector
+    kv_buffer_device: cuda
+    kv_connector_extra_config:
+      backends: ["UCX"]
+  env:
+    # Prefill and decode sit on different nodes without RDMA, so NIXL/UCX
+    # moves KV over TCP, staging GPU memory with cuda_copy.
+    - name: UCX_TLS
+      value: "tcp,cuda_copy"
+    # Decode's NIXL pull is a GET that UCX emulates over TCP in segment-sized
+    # fragments (default 8 KiB TX / 64 KiB RX), each staged through host
+    # memory. A ~69 MB Qwen3.5 KV pull is then thousands of fragments and
+    # tops out near 2.7 Gbit/s. 1 MiB segments lift that cap
+    # (smg-project/smg#4276) for ~24 MiB of extra host memory.
+    - name: UCX_TCP_TX_SEG_SIZE
+      value: "1m"
+    - name: UCX_TCP_RX_SEG_SIZE
+      value: "1m"
+    # vLLM's NIXL worker moves Qwen3.5's Mamba conv state with 3 reads and
+    # needs the DS layout, otherwise the engine fails at KV-cache init.
+    - name: VLLM_SSM_CONV_STATE_LAYOUT
+      value: "DS"
+  # CPU and memory per pod, merged with the role's `resources` below.
+  # Requests equal limits (Guaranteed QoS, as upstream), so a busy neighbour
+  # can't evict or throttle an engine. nvidia.com/gpu is set from the role's
+  # tensorParallelSize. Sized for the 1-GPU RTX PRO 6000 VMs (24 vCPU, 218 GB);
+  # the memory includes the /dev/shm tmpfs.
+  resources:
+    requests:
+      cpu: "16"
+      memory: 160Gi
+    limits:
+      cpu: "16"
+      memory: 160Gi
+  # /dev/shm, used by NCCL between the GPUs of a TP>1 engine.
+  shmSize: 20Gi
+
+# Decode-side routing sidecar: sends the prefill to the prefill pod, then
+# has local vLLM pull the KV over NIXL.
+routingSidecar:
+  image:
+    registry: ghcr.io/llm-d
+    repository: llm-d-router-disagg-sidecar
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+# Per-role settings. Each replica is one vLLM engine (one pod) with
+# tensorParallelSize GPUs. A decode TP below prefill TP is rejected: vLLM's
+# NIXL connector only fans out (prefill TP1 -> decode TP4 works, the reverse
+# crashes decode). For example, 4 decode engines: decode.replicas=4; one
+# decode engine on 4 GPUs: decode.tensorParallelSize=4.
+#
+# The pods request nvidia.com/gpu and tolerate the usual GPU taint, so they
+# land on GPU nodes without a nodeSelector. No placement rule by default, as
+# upstream: P and D may share a node, which only shortens the KV transfer. Use
+# `affinity` to pin or spread a role.
+prefill:
+  replicas: 1
+  tensorParallelSize: 1
+  extraArgs: []
+  # Overrides on top of modelServers.resources (e.g. more memory for TP4).
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+decode:
+  replicas: 1
+  tensorParallelSize: 1
+  extraArgs: []
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+# --------------------------------------------------------------- volumes ---
+# One weight cache shared by every model-server pod, as llm-d's model-cache
+# component and NVIDIA Dynamo do: a Job downloads the model into it once, and
+# pods wait for it before starting vLLM. The claim survives rollouts, scaling
+# and `helm uninstall` (delete it by hand: README, "Clean up").
+# enabled=false: every pod downloads into its own emptyDir on each start, the
+# upstream default, for clusters without a ReadWriteMany StorageClass.
+persistence:
+  enabled: true
+  # Empty = the cluster's default StorageClass. Needs ReadWriteMany (NFS,
+  # CephFS, a cloud file share) unless every model server is on one node.
+  storageClass: ""
+  accessMode: ReadWriteMany
+  size: 50Gi
+
+# ------------------------------------------------------------ monitoring ---
+# PodMonitors for both vLLM engines and a Grafana dashboard ConfigMap. pqbench
+# reads each pod's vLLM metrics from this Prometheus after a run, so it needs
+# kube-prometheus-stack (README, step 1). false = no Prometheus objects.
+monitoring:
+  enabled: true
+  # vLLM scrape interval; pqbench samples Prometheus at the same step.
+  interval: 1s
+  # Namespace of kube-prometheus-stack, whose Grafana sidecar loads the dashboard.
+  namespace: monitoring

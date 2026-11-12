@@ -1,0 +1,54 @@
+# Generated from epp.yaml + variants.yaml[no-flow-control] by render-variants.sh. Do not edit.
+# EndpointPickerConfig for llm-d-router v1.0.0: P/D disaggregation + flow control.
+#
+# Upstream ships these as two separate guides (guides/pd-disaggregation and
+# guides/flow-control). This file combines them, starting from the P/D
+# flow-control recipe in github.com/alexagriffith/flow-control-benchmarks.
+#
+# Every plugin used here is Beta or Stable in v1.0.0, so the EPP does not need
+# --allow-experimental-plugins.
+#
+# This is the `hybrid` variant. The others are yq expressions in variants.yaml,
+# rendered into variants/<name>.yaml (README, "Router variants"). Install one
+# with --set-file. After a calibration, update the two limits on
+# concurrency-detector and rerun render-variants.sh.
+apiVersion: llm-d.ai/v1
+kind: EndpointPickerConfig
+plugins:
+  # Reads the OpenAI request body: token counts for the hybrid detector and
+  # the flow key (objective -> priority, fairness id -> tenant queue).
+  - type: openai-parser
+  # Candidate selection: one profile for prefill pods, one for decode pods.
+  - type: prefill-filter
+  - type: decode-filter
+  - type: queue-scorer
+  - type: max-score-picker
+  # Split every request: prefill pod builds the KV cache, decode pod pulls it
+  # over NIXL and streams the response.
+  - type: always-disagg-pd-decider
+  - type: disagg-profile-handler
+    parameters:
+      deciders:
+        prefill: always-disagg-pd-decider
+  # In-flight accounting consumed by the hybrid detector. Count only tokens
+  # already in the request; max_tokens is an upper bound, not a prediction.
+  - name: inflight-load
+    type: inflight-load-producer
+    parameters:
+      addEstimatedOutputTokens: false
+requestHandler:
+  parsers:
+    - pluginRef: openai-parser
+schedulingProfiles:
+  # Prefill: the pod that reads the prompt and produces KV blocks.
+  - name: prefill
+    plugins:
+      - pluginRef: prefill-filter
+      - pluginRef: queue-scorer
+      - pluginRef: max-score-picker
+  # Decode: the pod that owns the response (its routing sidecar calls prefill first).
+  - name: decode
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: queue-scorer
+      - pluginRef: max-score-picker

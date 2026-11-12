@@ -1,0 +1,52 @@
+# A minimal Prometheus + Grafana (README, step 1). Prometheus scrapes every vLLM
+# pod through the pd-pool PodMonitors (at their 1 s interval), and pqbench
+# reads those per-pod series after each run; Grafana shows the run live.
+fullnameOverride: kps
+
+alertmanager:
+  enabled: false
+nodeExporter:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    # Pick up the router's ServiceMonitor and the pd-pool PodMonitors,
+    # whatever labels they carry.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    scrapeInterval: 5s
+    evaluationInterval: 15s
+    retention: 3d
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        memory: 4Gi
+
+grafana:
+  fullnameOverride: kps-grafana
+  adminPassword: priority-queue
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi

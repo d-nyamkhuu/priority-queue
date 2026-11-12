@@ -1,0 +1,21 @@
+apiVersion: v2
+name: pd-pool
+description: >-
+  A prefill/decode-disaggregated vLLM pool for the llm-d router: model servers,
+  traffic classes (InferenceObjectives), monitoring, and model-weight
+  caches. The router itself is the upstream
+  llm-d-router-standalone chart, installed separately.
+type: application
+version: 0.5.0
+# The llm-d release whose P/D guide, router chart and images this chart tracks.
+appVersion: "v1.0.0"
+# Native sidecar containers (the decode pod's routing-proxy).
+kubeVersion: ">=1.29.0-0"
+home: https://github.com/d-nyamkhuu/priority-queue
+sources:
+  - https://github.com/d-nyamkhuu/priority-queue
+  - https://github.com/llm-d/llm-d/tree/v1.0.0/guides/pd-disaggregation
+maintainers:
+  - name: d-nyamkhuu
+    url: https://github.com/d-nyamkhuu
+keywords: [llm-d, vllm, inference, flow-control, prefill-decode]

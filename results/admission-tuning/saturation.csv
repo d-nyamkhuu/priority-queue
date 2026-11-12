@@ -1,0 +1,4 @@
+variant,phase,peak_saturation_decode,peak_saturation_effective,peak_saturation_prefill
+cap-tight,surge,1.0,1.0,0.352
+hybrid,surge,0.875,0.875,0.6336
+no-holdback,surge,1.0,1.0,0.88

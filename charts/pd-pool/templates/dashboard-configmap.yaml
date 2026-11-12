@@ -1,0 +1,15 @@
+{{- if .Values.monitoring.enabled }}
+# Grafana dashboard: EPP flow control (saturation by P/D stage, per-band and
+# per-tenant queues, queue wait) next to vLLM engine state on both roles.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pd-pool.fullname" . }}-dashboard
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    {{- include "pd-pool.labels" . | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  dashboard.json: |-
+    {{- .Files.Get "files/dashboard.json" | nindent 4 }}
+{{- end }}
