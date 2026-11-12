@@ -4,6 +4,23 @@ A Kubernetes deployment that serves one LLM (Qwen3.5-9B) to several tenants with
 latency needs from a prefill/decode-disaggregated GPU pool. Load tests show what the router's
 priority queues, per-tenant fairness and stage-aware admission do when the pool is overloaded.
 
+**[Key results](#key-results)** · [How it works](#how-it-works) · [Results](#results) · [Takeaways](#takeaways-for-running-llm-d-flow-control) · [Run it yourself](#run-it-yourself)
+
+## Key results
+
+p95 time to first token (TTFT) while the pool is overloaded, with llm-d's flow control on
+and off:
+
+| Question | With flow control | Without / alternative |
+|---|---|---|
+| [Priority](#1-priority-under-overload): batch surges to 1.8× pool capacity | Realtime and standard **355 ms** | 1.0 s, and 59% of batch dropped |
+| [Fairness](#2-fairness-inside-a-priority-band): one tenant bursts to ~5× its share | Other tenants **~520 ms** | Everyone ~78 s |
+| [P/D admission](#3-pd-aware-admission): prefill-heavy, then decode-heavy surge | Hybrid detector: realtime **≤ 1.1 s** in both | Single-signal detectors: 6.7 s or 8.7 s |
+| [Tuning](#4-admission-tuning): holdback reserves capacity for realtime | Realtime **420 ms** | No reserve: 508 ms |
+
+Below the router, the biggest win was in the KV transfer between the two GPUs: one UCX
+setting raised pool throughput **4.2×** ([details](#moving-the-kv-cache)).
+
 ## The problem
 
 GPUs are expensive, so teams share them. A shared inference pool typically serves three
@@ -44,7 +61,7 @@ GPU B sees much less of that interference, and each request pays one KV-cache tr
    decode-heavy overload?
 4. **Tuning.** What does reserving capacity for realtime cost the lower classes?
 
-## The setup
+## How it works
 
 One prefill and one decode vLLM pod, each on its own NVIDIA RTX PRO 6000 (96 GB), plus one
 8 vCPU node for the router and the load generator (managed Kubernetes, no RDMA between
@@ -89,20 +106,6 @@ percentile: how long a user waits before the answer starts, for the slowest 5% o
 For overloaded tenants the results also report the **share of requests served**, since a rejected
 request has no TTFT.
 
-## Key results
-
-p95 TTFT while the pool is overloaded:
-
-| Question | With flow control | Without / alternative |
-|---|---|---|
-| [Priority](#1-priority-under-overload): batch surges to 1.8× pool capacity | Realtime and standard **355 ms** | 1.0 s, and 59% of batch dropped |
-| [Fairness](#2-fairness-inside-a-priority-band): one tenant bursts to ~5× its share | Other tenants **~520 ms** | Everyone ~78 s |
-| [P/D admission](#3-pd-aware-admission): prefill-heavy, then decode-heavy surge | Hybrid detector: realtime **≤ 1.1 s** in both | Single-signal detectors: 6.7 s or 8.7 s |
-| [Tuning](#4-admission-tuning): holdback reserves capacity for realtime | Realtime **420 ms** | No reserve: 508 ms |
-
-Below the router, the biggest win was in the KV transfer between the two GPUs: one UCX
-setting raised pool throughput **4.2×** ([details](#below-the-router-moving-the-kv-cache)).
-
 ## How it was tested
 
 1. **Calibrate.** A closed-loop sweep with admission limits disabled measures the pool's
@@ -123,7 +126,7 @@ setting raised pool throughput **4.2×** ([details](#below-the-router-moving-the
 *The calibration sweep for the default shape. Past 64 concurrent requests throughput barely
 grows, but p95 TTFT climbs from 0.5 s to 4 s: the extra requests only queue inside vLLM. So 64
 became the request limit, and flow control does that queueing instead, in priority order. All
-three shapes, with token throughput and TPOT: [sweep.png](results/calibration/sweep.png).*
+three shapes are in [Pool capacity](#pool-capacity-the-calibration-sweep).*
 
 The load generator runs in a pod on the CPU node, next to the router. It samples the router's
 metrics once a second while it sends traffic, and afterwards reads every engine's metrics from
@@ -139,7 +142,7 @@ The four scenarios below each answer one of the questions above. 11 runs in tota
 variants in [deploy/router/variants/](deploy/router/variants/). The traffic charts are drawn
 from the rates each run recorded, and every comparison is one run per configuration.
 
-## Scenarios
+## Results
 
 ### 1. Priority under overload
 
@@ -216,9 +219,6 @@ in-flight prompt tokens, and the hybrid that counts both.
 
 **Result.** Hybrid kept the realtime probe at ≤ 1.1 s in both surges. Request-only admission
 gave 6.7 s during the prefill surge; token-only admission gave 8.7 s during the decode surge.
-The left chart shows peak saturation with two dispatch ceilings: **0.75 for the surging
-standard tenants**, and **1.0 for the realtime probe**. Even the single-signal peaks exceed
-0.75, so a peak below 1.0 does not mean standard traffic was never held back.
 
 ![Prefill-heavy prompts fill the token limit with few requests; decode-heavy answers fill the request limit with few tokens; hybrid takes the larger ratio](docs/img/hybrid-detector.svg)
 
@@ -226,16 +226,15 @@ standard tenants**, and **1.0 for the realtime probe**. Even the single-signal p
 requests, 30,000 prompt tokens). Eight 4,096-token prompts are only 8 requests but 1.09× the
 token limit; seventy long answers are 1.09× the request limit but well under the token limit.*
 
-These results are consistent with request counts underrepresenting long-prompt work and
-prompt-token counts underrepresenting long generations. Peaks alone cannot show when or for
-how long admission was blocked; the latency measurements support hybrid for this workload,
-without proving that either single-signal gate stayed open throughout.
+Peak saturation alone can't show when or for how long admission was blocked, so the latency
+results support hybrid for this workload rather than prove why each single signal fell short.
 
 ![Peak saturation per detector and realtime p95 TTFT, prefill-heavy and decode-heavy surge](results/figures/fig_pd_detector_peaks.png)
 
-*Left: the highest saturation each detector reported in each surge. Right: p95 TTFT of the
-realtime probe's served requests. The surging tenants are standard, so they stop dispatching
-at 0.75.*
+*Left: the highest saturation each detector reported in each surge, against the two dispatch
+ceilings: 0.75 for the surging standard tenants and 1.0 for the realtime probe. Every peak
+exceeds 0.75, so a peak below 1.0 doesn't mean standard traffic was never held back. Right:
+p95 TTFT of the realtime probe's served requests.*
 
 ### 4. Admission tuning
 
@@ -261,7 +260,42 @@ queues in the router too.
 *Each point is one router setting, run against the same traffic. Realtime latency counts served
 requests only.*
 
-### Below the router: moving the KV cache
+### Caveats
+
+Each scenario ran once, so differences of a few tens of ms are noise. p95 values near 90 s
+are the router's queue time limit, not service time. Full per-tenant tables (TTFT, TPOT,
+throughput, success rate, goodput) are in [results/summary.md](results/summary.md), and each
+run has a `timeline.png` with latency, throughput, queue depth, saturation and vLLM state over
+time (for example [consolidation](results/consolidation/hybrid/rep1/timeline.png)).
+
+## Below the router
+
+The scenarios test the router. Underneath it, the pool's capacity comes from the GPUs and,
+with P/D, from the network between them.
+
+### Pool capacity: the calibration sweep
+
+The sweep raises the number of concurrent clients step by step, with admission limits
+disabled, once per request shape. Each shape hits a different limit:
+
+| Shape (prompt / answer tokens) | Capacity at the knee | What limits it |
+|---|---|---|
+| default (512 / 128) | 23.9 req/s at 64 in flight | KV transfer between the GPUs ([next section](#moving-the-kv-cache)); prefill tensor cores are only 28–34% busy |
+| prefill-heavy (4,096 / 32) | 6.1 req/s at 8 in flight | prefill compute (tensor cores 76% busy); past 16 in flight, throughput *falls*, to 5.6 req/s at 64 |
+| decode-heavy (256 / 1,024) | 4.3 req/s at 96 in flight | the decode batch: time per output token doubles, from 13 ms at 8 in flight to 26 ms at 160 |
+
+The router's admission limits come from these knees: 64 in-flight requests (the default
+shape's knee) and 30,000 in-flight prompt tokens (about the prefill-heavy knee times its
+prompt length).
+
+![Calibration sweep for the three request shapes: completed req/s, p95 TTFT and median time per output token against concurrent clients](results/calibration/sweep.png)
+
+*One column per shape. Rows: completed requests per second, p95 TTFT and median time per
+output token. The dashed line and the large dot mark the knee; the corner label gives the
+value there. Token throughput and other percentiles are in
+[sweep_summary.csv](results/calibration/sweep_summary.csv).*
+
+### Moving the KV cache
 
 With UCX's default settings, a fixed 48-client probe reached only 4.9 req/s at 9.6 s p95 TTFT
 (all runs above use the fix below). The bottleneck was the KV-cache transfer between the two
@@ -283,31 +317,33 @@ the mean transfer from 7.2 s to 0.14 s:
 
 The next limit is one receive thread draining one TCP connection, at ~15–17 Gbit/s. NIXL can
 split a transfer across threads (measured up to ~25 Gbit/s), but vLLM v0.31 doesn't pass that
-setting through yet. Details: [docs/findings.md](docs/findings.md#4-kv-transfer-between-prefill-and-decode).
+setting through yet.
 
-### Caveats
+## Takeaways for running llm-d flow control
 
-Each scenario ran once, so differences of a few tens of ms are noise. p95 values near 90 s
-are the router's queue time limit, not service time. Full per-tenant tables (TTFT, TPOT,
-throughput, success rate, goodput) are in [results/summary.md](results/summary.md), and each
-run has a `timeline.png` with latency, throughput, queue depth, saturation and vLLM state over
-time (for example [consolidation](results/consolidation/hybrid/rep1/timeline.png)).
-
-## Repository layout
-
-| Component | Where |
-|---|---|
-| Router config (P/D scheduling + flow control in one file) | [deploy/router/epp.yaml](deploy/router/epp.yaml) |
-| Model servers (`DisaggregatedSet`), traffic classes, volumes, Grafana dashboard | [charts/pd-pool/](charts/pd-pool/) |
-| Load generator, analysis and figures (Python, HTTP only) | [pqbench/](pqbench/) |
-| Container image, for running pqbench inside the cluster | [Dockerfile](Dockerfile) |
+- **Calibrate before setting limits.** The admission limits are the pool's knee, which depends
+  on the model, the GPUs and the network. Rerun the sweep on new hardware
+  ([how](#calibrating-for-different-hardware)).
+- **Use the hybrid detector when prompt and answer lengths vary.** Request counts miss long
+  prompts and token counts miss long answers; only hybrid protected realtime in both surges.
+- **Size each band's queue for its bursts, or retry.** Queue limits are per band, so one
+  tenant's burst fills the band and every tenant in it gets 429s. Allow about rate × queue
+  time limit (≈ 1,500 requests here, against 512), and have clients retry 429s with backoff.
+- **Holdback is the knob for protecting realtime.** Reserving the top 25% of capacity gave
+  realtime its lowest latency, at the cost of lower-priority throughput.
+- **Keep the request cap above the top tier's own demand.** Halved to 32, it made realtime
+  queue in the router too.
+- **Batch is dropped, not queued, even with flow control off.** Negative priority marks
+  requests sheddable when the pool is saturated; give batch clients retries if that matters.
+- **Check the network under P/D.** Without RDMA, moving the KV cache, not the GPUs, set the
+  pool's capacity; raise UCX's TCP segment size first.
 
 ## Run it yourself
 
 **Cluster:** Kubernetes ≥ 1.33 with two GPU nodes (one NVIDIA GPU each, exposed as
 `nvidia.com/gpu`), one CPU node (8 vCPU / 32 GB) and a StorageClass with ReadWriteMany
 access for the shared weight cache (without one, see [Weights](#weights-replicas-and-tensor-parallelism)).
-**Tools:** `kubectl`, `helm` ≥ 3.14, Python ≥ 3.11.
+**Tools:** `kubectl`, `helm` ≥ 3.14, Python ≥ 3.14.
 
 ### 1. Install the dependencies
 
@@ -329,8 +365,9 @@ Prometheus (kube-prometheus-stack). It scrapes every vLLM pod once a second; `pq
 the per-pod engine metrics from it after each run, and Grafana shows the run live:
 
 ```bash
-helm upgrade --install kps kube-prometheus-stack --repo https://prometheus-community.github.io/helm-charts \
-  --version 75.15.1 -n monitoring --create-namespace -f deploy/kube-prometheus-stack.values.yaml --wait
+helm upgrade --install kps kube-prometheus-stack \
+  --repo https://prometheus-community.github.io/helm-charts --version 75.15.1 \
+  -n monitoring --create-namespace -f deploy/kube-prometheus-stack.values.yaml --wait
 ```
 
 ### 2. Deploy the model servers and the router
@@ -345,7 +382,8 @@ the Service names in the port-forward commands below.
 
 ```bash
 VARIANT=hybrid
-helm upgrade --install priority-queue oci://ghcr.io/llm-d/charts/llm-d-router-standalone --version v1.0.0 -n priority-queue \
+helm upgrade --install priority-queue \
+  oci://ghcr.io/llm-d/charts/llm-d-router-standalone --version v1.0.0 -n priority-queue \
   -f https://raw.githubusercontent.com/llm-d/llm-d/v1.0.0/guides/recipes/router/base.values.yaml \
   -f deploy/router/values.yaml \
   --set-file "router.epp.pluginsCustomConfig.custom-plugins\.yaml=deploy/router/variants/$VARIANT.yaml" \
@@ -368,9 +406,11 @@ Each role scales on its own. Every replica is one vLLM engine with `tensorParall
 
 ```bash
 # Four decode engines on one GPU each:
-helm upgrade pd-pool charts/pd-pool -n priority-queue --reset-then-reuse-values --set decode.replicas=4
+helm upgrade pd-pool charts/pd-pool -n priority-queue --reset-then-reuse-values \
+  --set decode.replicas=4
 # One decode engine on four GPUs (TP4):
-helm upgrade pd-pool charts/pd-pool -n priority-queue --reset-then-reuse-values --set decode.tensorParallelSize=4
+helm upgrade pd-pool charts/pd-pool -n priority-queue --reset-then-reuse-values \
+  --set decode.tensorParallelSize=4
 ```
 
 Decode TP must be at least prefill TP: vLLM's NIXL connector only fans out (prefill TP1 to
@@ -397,7 +437,9 @@ variants replaces the router pod, which ends its port-forward, so that one recon
 loop:
 
 ```bash
-while true; do kubectl -n priority-queue port-forward svc/priority-queue-epp 8080:80 9090:9090; sleep 2; done &
+while true; do
+  kubectl -n priority-queue port-forward svc/priority-queue-epp 8080:80 9090:9090; sleep 2
+done &
 kubectl -n monitoring port-forward svc/kps-prometheus 9091:9090 &
 ```
 
@@ -413,7 +455,8 @@ The prefill engines' request counter should go up with each request; if it doesn
 served the request alone:
 
 ```bash
-curl -s http://localhost:9091/api/v1/query --data-urlencode 'query=sum by (llm_d_ai_role) (vllm:request_success_total)'
+curl -s http://localhost:9091/api/v1/query \
+  --data-urlencode 'query=sum by (llm_d_ai_role) (vllm:request_success_total)'
 ```
 
 ### 4. Run a scenario
@@ -427,7 +470,7 @@ The run takes about 4 minutes and writes to `results/priority-tiers/hybrid/rep1/
 reads the pool's capacity from the committed `results/calibration/calibration.json` and
 talks to the port-forwards above (override with `--router`, `--epp-metrics`, `--prometheus`
 or `PQ_*` variables). Repeat for each scenario and each router variant it compares (listed under
-[Scenarios](#scenarios), and by `pqbench scenarios`), switching the router to that variant
+[Results](#results), and by `pqbench scenarios`), switching the router to that variant
 first.
 
 ### 5. Analyze
@@ -503,6 +546,15 @@ kubectl -n priority-queue delete pvc pd-pool-model-cache
 The weight cache outlives `helm uninstall` (so a reinstall skips the download) and needs
 deleting by hand.
 
+## Repository layout
+
+| Component | Where |
+|---|---|
+| Router config (P/D scheduling + flow control in one file) | [deploy/router/epp.yaml](deploy/router/epp.yaml) |
+| Model servers (`DisaggregatedSet`), traffic classes, volumes, Grafana dashboard | [charts/pd-pool/](charts/pd-pool/) |
+| Load generator, analysis and figures (Python, HTTP only) | [pqbench/](pqbench/) |
+| Container image, for running pqbench inside the cluster | [Dockerfile](Dockerfile) |
+
 ## Development
 
 ```bash
@@ -534,3 +586,7 @@ guides), [vLLM](https://github.com/vllm-project/vllm) v0.31 with NIXL, and
 router config started from the recipe in
 [alexagriffith/flow-control-benchmarks](https://github.com/alexagriffith/flow-control-benchmarks)
 and was recalibrated for this model and hardware.
+
+## License
+
+[MIT](LICENSE)

@@ -9,7 +9,7 @@ description = "Benchmark llm-d flow control (priority queuing) on a prefill/deco
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 # Only what load generation needs: the container image installs just these.
 dependencies = [
   "httpx>=0.28,<1",
@@ -40,7 +40,7 @@ include = ["pqbench", "tests", "README.md", "LICENSE"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM"]

@@ -25,8 +25,6 @@ Every repeat writes to its own directory:
   DONE              written last; a rerun skips repeats that have it
 """
 
-from __future__ import annotations
-
 import asyncio
 import csv
 import json

@@ -4,8 +4,6 @@ Pure Python on purpose: the load generator runs in a small image without
 numpy, and every table and chart must use the same percentile definition.
 """
 
-from __future__ import annotations
-
 import math
 from collections.abc import Iterable
 

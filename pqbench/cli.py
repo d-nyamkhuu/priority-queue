@@ -16,8 +16,6 @@ README's `kubectl port-forward` commands open; override them with flags or PQ_*
 variables.
 """
 
-from __future__ import annotations
-
 import argparse
 import asyncio
 import os

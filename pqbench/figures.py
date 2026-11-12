@@ -28,8 +28,6 @@ One visual system, shared with the diagrams in docs/ ("navy + coral"):
   - short labels only: longer explanations go in the README text under each figure.
 """
 
-from __future__ import annotations
-
 import json
 from pathlib import Path
 
@@ -385,10 +383,11 @@ def fig_priority_tiers(root: Path, out: Path) -> None:
         ax.minorticks_off()
         ax.set_xlim(0, sum(p["duration_s"] for p in r.meta["phases"]))
         ax.set_xlabel("seconds")
-        panel_title(ax, title)
+        # Title on top, the panel's two numbers on a line of their own beneath it.
+        ax.set_title(title, pad=19)
         protected = max(class_p95(rs, "realtime"), class_p95(rs, "standard"))
         stats = f"realtime + standard p95 {ms_label(protected)}  ·  batch served {served_share(rs, 'batch'):.0%}"
-        ax.text(1.0, 1.02, stats, transform=ax.transAxes, ha="right", va="bottom", fontsize=FS_NOTE, color=INK2)
+        ax.text(0.0, 1.015, stats, transform=ax.transAxes, ha="left", va="bottom", fontsize=FS_NOTE, color=INK2)
     axes[0].set_ylabel("p95 TTFT")
     axes[0].get_yticklabels()[-1].set_color(C_REJECT)
     legend(fig, [line(CLASS[o], lw=2.4) for o in CLASS], list(CLASS))
@@ -580,6 +579,58 @@ def fig_kv_transfer(root: Path, out: Path) -> None:
     gain = after["throughput_rps"] / before["throughput_rps"]
     header(fig, f"KV transfer fix: larger UCX TCP segments, {gain:.1f}× pool throughput")
     save(fig, out, "fig_kv_transfer.png")
+
+
+def fig_sweep(levels: pd.DataFrame, knees: dict[str, int], shapes: dict, out: Path) -> None:
+    """The calibration sweep: one column per request shape, throughput (navy) and the
+    latency it costs (coral) against concurrency, with the knee marked and labelled."""
+    rows = (
+        ("rps", "completed req/s", NAVY, lambda v: f"{v:.1f} req/s"),
+        ("ttft_p95_ms", "p95 TTFT", CORAL, ms_label),
+        ("tpot_p50_ms", "time per output\ntoken, p50 (ms)", CORAL, lambda v: f"{v:.0f} ms"),
+    )
+    groups = list(levels.groupby("shape", sort=False))
+    fig, axes = plt.subplots(
+        len(rows), len(groups), figsize=(WIDTH, 7.6), sharex="col", layout="constrained", squeeze=False
+    )
+    fig.get_layout_engine().set(h_pad=0.08, wspace=0.06)
+    for j, (shape, g) in enumerate(groups):
+        g = g.sort_values("concurrency")
+        k = knees[shape]
+        at = g[g["concurrency"] == k].iloc[0]
+        for i, (col, label, color, fmt) in enumerate(rows):
+            ax = axes[i, j]
+            top = g[col].max() * 1.3
+            ax.axvline(k, color=INK3, lw=1, ls=(0, (4, 3)), zorder=1)
+            ax.plot(g["concurrency"], g[col], color=color, lw=2, marker="o", ms=4, zorder=3)
+            filled(ax, [k], [at[col]], color=color, size=70)
+            ax.text(
+                0.98,
+                0.97,
+                f"at knee  {fmt(at[col])}",
+                transform=ax.transAxes,
+                ha="right",
+                va="top",
+                fontsize=FS_VALUE - 1,
+                family="monospace",
+                color=INK,
+                bbox={"fc": PAPER, "ec": "none", "pad": 2},
+                zorder=5,
+            )
+            ax.set_ylim(0, top)
+            ax.yaxis.set_major_locator(plt.MaxNLocator(3))
+            if col == "ttft_p95_ms":
+                ax.yaxis.set_major_formatter(
+                    FuncFormatter(lambda v, _: "0" if v == 0 else ms_label(v).replace(".0 s", " s"))
+                )
+            if j == 0:
+                ax.set_ylabel(label)
+        s = shapes[shape]
+        panel_title(axes[0, j], f"{shape}\n{s['prompt_tokens']:,} in / {s['output_tokens']:,} out · knee {k}")
+        axes[-1, j].set_xlabel("concurrent clients")
+        axes[-1, j].set_xlim(0, g["concurrency"].max() * 1.05)
+    header(fig, "Calibration sweep: where each request shape stops scaling")
+    save(fig, out, "sweep.png")
 
 
 FIGURES = (fig_load, fig_priority_tiers, fig_fairness, fig_pd_detectors, fig_admission, fig_kv_transfer)

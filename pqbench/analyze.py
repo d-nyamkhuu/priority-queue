@@ -9,8 +9,6 @@ The CSVs are long-format and keep every repeat, so new charts can be made
 later without rerunning on GPUs.
 """
 
-from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
@@ -124,40 +122,8 @@ def calibrate(d: Path) -> None:
     (d / "calibration.json").write_text(json.dumps(calibration, indent=2))
     print(json.dumps(calibration, indent=2))
 
-    groups = list(levels.groupby("shape", sort=False))
-    fig, axes = plt.subplots(4, len(groups), figsize=(5.5 * len(groups), 15), sharex="col", squeeze=False)
-    for i, (shape, g) in enumerate(groups):
-        g = g.sort_values("concurrency")
-        c = g["concurrency"]
-        ax = axes[0, i]
-        ax.plot(c, g["rps"], "o-", color=figures.NAVY)
-        ax.set_title(
-            f"{shape}  ({meta['shapes'][shape]['prompt_tokens']} in / {meta['shapes'][shape]['output_tokens']} out)"
-        )
-        ax.set_ylabel("completed req/s")
-        ax = axes[1, i]
-        ax.plot(c, g["total_tps"], "o-", color=figures.INK, label="total")
-        ax.plot(c, g["input_tps"], "o--", color=figures.C_PREFILL, label="input")
-        ax.plot(c, g["output_tps"], "o--", color=figures.C_DECODE, label="output")
-        ax.set_ylabel("tokens/s")
-        ax.legend(fontsize=10)
-        ax = axes[2, i]
-        for q, ls in ((50, "o--"), (95, "o-"), (99, "o:")):
-            ax.plot(c, g[f"ttft_p{q}_ms"], ls, color=figures.CLASS["realtime"], label=f"p{q}")
-        ax.set_ylabel("TTFT (ms)")
-        ax.legend(fontsize=10)
-        ax = axes[3, i]
-        for q, ls in ((50, "o--"), (95, "o-"), (99, "o:")):
-            ax.plot(c, g[f"tpot_p{q}_ms"], ls, color=figures.CLASS["standard"], label=f"p{q}")
-        ax.set_ylabel("TPOT (ms / output token)")
-        ax.set_xlabel("client concurrency")
-        ax.legend(fontsize=10)
-        for ax in axes[:, i]:
-            ax.axvline(shapes[shape]["knee_concurrency"], ls="--", color=figures.C_REJECT)
-            ax.grid(alpha=0.3)
-    fig.suptitle(f"Calibration sweep: {meta.get('model', 'model')} (dashed = knee)")
-    fig.tight_layout()
-    fig.savefig(d / "sweep.png", dpi=130)
+    knees = {shape: v["knee_concurrency"] for shape, v in shapes.items()}
+    figures.fig_sweep(levels, knees, meta["shapes"], d)
 
 
 # ---------------------------------------------------------------- report ---

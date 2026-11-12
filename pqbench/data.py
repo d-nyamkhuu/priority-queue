@@ -5,8 +5,6 @@ Layout (written by `pqbench run`):
   <root>/<scenario>/<variant>/repN/{requests.jsonl, metrics.csv, meta.json, DONE}
 """
 
-from __future__ import annotations
-
 import json
 from pathlib import Path
 
